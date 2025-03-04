@@ -1,5 +1,5 @@
-pub mod create_team;
+pub mod create_squad;
 pub mod initialize;
 
-pub use create_team::*;
+pub use create_squad::*;
 pub use initialize::*;

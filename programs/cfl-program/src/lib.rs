@@ -1,10 +1,12 @@
 use anchor_lang::prelude::*;
 
 declare_id!("D6Y6qVKNMTqzafrZfrUWshsbJWmR17b4jdChXruX7KtV");
-pub mod instructions;
-use instructions::*;
+
 pub mod errors;
+pub mod instructions;
 pub mod state;
+
+use instructions::*;
 
 #[program]
 pub mod cfl_program {
@@ -15,7 +17,12 @@ pub mod cfl_program {
         instructions::initialize(ctx)
     }
 
-    pub fn create_team(ctx: Context<CreateTeam>, feed_id: String) -> Result<()> {
-        instructions::create_team(ctx, feed_id)
+    pub fn create_squad(
+        ctx: Context<CreateSquad>,
+        squad_index: u8,
+        mint1: Pubkey,
+        mint2: Pubkey,
+    ) -> Result<()> {
+        instructions::create_squad(ctx, squad_index, mint1, mint2)
     }
 }
