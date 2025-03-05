@@ -7,14 +7,13 @@ use anchor_lang::prelude::*;
 pub fn create_squad(
     ctx: Context<CreateSquad>,
     squad_index: u8,
-    mint1: Pubkey,
-    mint2: Pubkey,
+    price_feed_ids: Vec<String>,
 ) -> Result<()> {
     let squad = &mut ctx.accounts.squad;
     let profile = &mut ctx.accounts.user_profile;
     let owner = ctx.accounts.user.key();
 
-    squad.set_inner(Squad::new(owner, mint1, mint2, squad.bump, squad_index));
+    squad.set_inner(Squad::new(owner, price_feed_ids, squad.bump, squad_index));
     profile.increment();
 
     Ok(())

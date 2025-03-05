@@ -13,8 +13,8 @@ url = "https://api.apr.dev"
 [provider]
 # cluster = "https://rpc.mainnet-alpha.sonic.game"
 # cluster = "Devnet"
-cluster = "http://127.0.0.1:8899"
-# cluster = "Localnet"
+# cluster = "http://127.0.0.1:8899"
+cluster = "Localnet"
 wallet = "./environment/deployer.json"
 
 [scripts]
