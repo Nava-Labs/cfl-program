@@ -1,32 +1,33 @@
 use crate::errors::CustomError;
 use crate::state::*;
 
-use anchor_lang::system_program::Transfer;
 use anchor_lang::{prelude::*, system_program};
 
-pub fn create_room(
-    ctx: Context<CreateRoom>,
-    room_id: u8,
+pub fn create_match(
+    ctx: Context<CreateMatch>,
+    match_id: u8,
+    start_timestamp: i64,
+    duration: i64,
     sol_bet_amount_in_lamports: u64,
-    duration: u64,
 ) -> Result<()> {
-    let squad: &mut AccountInfo = &mut ctx.accounts.squad.to_account_info();
-    let room = &mut ctx.accounts.room;
+    let challenger_squad: &mut AccountInfo = &mut ctx.accounts.challenger_squad.to_account_info();
+    let match_account = &mut ctx.accounts.match_account;
     let user = &mut ctx.accounts.user;
 
-    room.set_inner(Room::new(
-        room_id,
+    match_account.set_inner(Match::new(
+        match_id,
         sol_bet_amount_in_lamports,
+        start_timestamp,
         duration,
-        squad.key(),
-        room.bump,
+        challenger_squad.key(),
+        match_account.bump,
     ));
 
     let transfer_ctx = CpiContext::new(
         ctx.accounts.system_program.to_account_info(),
         system_program::Transfer {
             from: user.to_account_info(),
-            to: room.to_account_info(),
+            to: match_account.to_account_info(),
         },
     );
 
@@ -36,20 +37,21 @@ pub fn create_room(
 }
 
 #[derive(Accounts)]
-#[instruction(room_id: u8)]
-pub struct CreateRoom<'info> {
+#[instruction(match_id: u8)]
+pub struct CreateMatch<'info> {
     /// CHECK:
     #[account(mut)]
-    pub squad: UncheckedAccount<'info>,
+    pub challenger_squad: UncheckedAccount<'info>,
 
     #[account(
         init,
         payer = user,
-        space = Room::ACCOUNT_SIZE,
-        seeds = [Room::SEED.as_bytes(), room_id.to_le_bytes().as_ref()],
+        space = Match::ACCOUNT_SIZE,
+        seeds = [Match::SEED.as_bytes(), match_id.to_le_bytes().as_ref()],
         bump
     )]
-    pub room: Account<'info, Room>,
+    pub match_account: Account<'info, Match>,
+
     #[account(mut)]
     pub user: Signer<'info>,
 

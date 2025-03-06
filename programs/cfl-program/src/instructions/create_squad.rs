@@ -8,12 +8,19 @@ pub fn create_squad(
     ctx: Context<CreateSquad>,
     squad_index: u8,
     price_feed_ids: Vec<String>,
+    weight_percentage: Vec<f64>,
 ) -> Result<()> {
     let squad = &mut ctx.accounts.squad;
     let profile = &mut ctx.accounts.user_profile;
     let owner = ctx.accounts.user.key();
 
-    squad.set_inner(Squad::new(owner, price_feed_ids, squad.bump, squad_index));
+    squad.set_inner(Squad::new(
+        owner,
+        price_feed_ids,
+        weight_percentage,
+        squad.bump,
+        squad_index,
+    ));
     profile.increment();
 
     Ok(())

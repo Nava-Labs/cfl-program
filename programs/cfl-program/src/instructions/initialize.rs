@@ -7,7 +7,6 @@ pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
     let global = &mut ctx.accounts.global;
     global.set_inner(Global::new(ctx.accounts.user.key()));
 
-    msg!("Greetings from: {:?}", ctx.program_id);
     Ok(())
 }
 

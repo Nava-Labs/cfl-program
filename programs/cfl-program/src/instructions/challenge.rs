@@ -3,19 +3,22 @@ use crate::state::*;
 
 use anchor_lang::prelude::*;
 
-pub fn claim_sol(ctx: Context<ClaimSol>, _match_id: u8) -> Result<()> {
+pub fn challenge(ctx: Context<Challenge>, _match_id: u8) -> Result<()> {
     let match_account = &mut ctx.accounts.match_account;
-    let user = &mut ctx.accounts.user;
+    let challenger = ctx.accounts.challenger_squad.key();
 
-    **match_account.to_account_info().try_borrow_mut_lamports()? -= match_account.sol_bet_amount;
-    **user.try_borrow_mut_lamports()? += match_account.sol_bet_amount;
+    match_account.start(challenger);
 
     Ok(())
 }
 
 #[derive(Accounts)]
 #[instruction(match_id: u8)]
-pub struct ClaimSol<'info> {
+pub struct Challenge<'info> {
+    /// CHECK:
+    #[account(mut)]
+    pub challenger_squad: UncheckedAccount<'info>,
+
     #[account(
         mut,
         seeds = [Match::SEED.as_bytes(), match_id.to_le_bytes().as_ref()],

@@ -22,14 +22,12 @@ const keypairDeployer = Keypair.fromSecretKey(secretKeyDeployer);
 const GLOBAL_SEED = "Global";
 const SQUAD_SEED = "Squad";
 const PROFILE_SEED = "Profile";
-const ROOM_SEED = "Room";
+const MATCH_SEED = "Match";
 
 describe("cfl-program", () => {
   const provider = anchor.AnchorProvider.env();
 
   const connection = anchor.getProvider().connection;
-  // const connection = new Connection("http://127.0.0.1:8899");
-  // const connection = new Connection("https://rpc.mainnet-alpha.sonic.game");
 
   const wallet = new Wallet(keypairDeployer);
 
@@ -43,25 +41,25 @@ describe("cfl-program", () => {
 
   const program = anchor.workspace.CflProgram as Program<CflProgram>;
 
-  // it("Is initialized!", async () => {
-  //   const ix = await program.methods.initialize().instruction();
-  //   const tx = new Transaction().add(ix);
-  //   tx.feePayer = keypairDeployer.publicKey;
+  it("Is initialized!", async () => {
+    const ix = await program.methods.initialize().instruction();
+    const tx = new Transaction().add(ix);
+    tx.feePayer = keypairDeployer.publicKey;
 
-  //   console.log(await connection.simulateTransaction(tx));
+    console.log(await connection.simulateTransaction(tx));
 
-  //   await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
-  //     skipPreflight: false,
-  //   });
+    await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
+      skipPreflight: false,
+    });
 
-  //   // const [global] = PublicKey.findProgramAddressSync(
-  //   //   [Buffer.from(GLOBAL_SEED)],
-  //   //   program.programId,
-  //   // );
+    // const [global] = PublicKey.findProgramAddressSync(
+    //   [Buffer.from(GLOBAL_SEED)],
+    //   program.programId,
+    // );
 
-  //   // let state = await program.account.global.fetch(global);
-  //   // console.log(state);
-  // });
+    // let state = await program.account.global.fetch(global);
+    // console.log(state);
+  });
 
   it("Squad Created!", async () => {
     const squadCount = 3;
@@ -74,6 +72,11 @@ describe("cfl-program", () => {
         "0x656cc2a39dd795bdecb59de810d4f4d1e74c25fe4c42d0bf1c65a38d74df48e9";
 
       let pfs = [pf1, pf2, pf3];
+      let percentages = [
+        parseFloat("1.5"),
+        parseFloat("20.5"),
+        parseFloat("66.667"),
+      ];
 
       let [profile] = PublicKey.findProgramAddressSync(
         [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
@@ -91,7 +94,7 @@ describe("cfl-program", () => {
       console.log("Squad pda", squad.toBase58());
 
       const ix = await program.methods
-        .createSquad(i, pfs)
+        .createSquad(i, pfs, percentages)
         .accounts({
           // @ts-ignore
           squad,
@@ -140,7 +143,7 @@ describe("cfl-program", () => {
       new PublicKey(program.idl.address),
       {
         // dataSlice: { offset: 8, length: 32 },
-        filters: [{ dataSize: 366 }],
+        filters: [{ dataSize: 450 }],
       },
     );
     // console.log(allAccountsOwned);
@@ -159,7 +162,8 @@ describe("cfl-program", () => {
     const borshAccountSchema = borsh.struct([
       borsh.u64("discriminator"),
       borsh.publicKey("owner"),
-      borsh.vec(borsh.str(), "price_feed_ids"),
+      borsh.vec(borsh.str(), "token_price_feed_ids"),
+      borsh.vec(borsh.f64(), "token_weghts"),
       borsh.u8("bump"),
       borsh.u8("squad_index"),
     ]);
@@ -171,8 +175,8 @@ describe("cfl-program", () => {
     return decodedData;
   };
 
-  it("Room Created!", async () => {
-    let [squad] = PublicKey.findProgramAddressSync(
+  it("Match Created!", async () => {
+    let [challengerSquad] = PublicKey.findProgramAddressSync(
       [
         Buffer.from(SQUAD_SEED),
         keypairDeployer.publicKey.toBuffer(),
@@ -183,20 +187,22 @@ describe("cfl-program", () => {
 
     const id = 0;
 
-    let [room] = PublicKey.findProgramAddressSync(
-      [Buffer.from(ROOM_SEED), Buffer.from(new Uint8Array([id]))],
+    let [match] = PublicKey.findProgramAddressSync(
+      [Buffer.from(MATCH_SEED), Buffer.from(new Uint8Array([id]))],
       program.programId,
     );
 
-    const sol = LAMPORTS_PER_SOL;
+    const start = new BN(1234);
     const duration = new BN(123);
+    const sol = new BN(LAMPORTS_PER_SOL);
+
     const ix = await program.methods
-      .createRoom(id, new BN(sol), duration)
+      .createMatch(id, start, duration, sol)
       .accounts({
         // @ts-ignore
-        squad,
+        challengerSquad,
         // @ts-ignore
-        room,
+        match,
         user: keypairDeployer.publicKey,
       })
       .instruction();
@@ -208,7 +214,7 @@ describe("cfl-program", () => {
     });
   });
 
-  it("Get Room Created", async () => {
+  it("Get Match Created", async () => {
     const allAccountsOwned = await connection.getProgramAccounts(
       new PublicKey(program.idl.address),
       {
@@ -219,20 +225,20 @@ describe("cfl-program", () => {
     console.log(allAccountsOwned);
 
     const decodedDatas = allAccountsOwned.map((x) => {
-      return decodeRoomAccountData(x.account.data);
+      return decodeMatchAccountData(x.account.data);
     });
-    console.log("decoded room data", JSON.stringify(decodedDatas, null, 3));
+    console.log("decoded match data", JSON.stringify(decodedDatas, null, 3));
   });
 
-  const decodeRoomAccountData = (buffer: Buffer) => {
+  const decodeMatchAccountData = (buffer: Buffer) => {
     const borshAccountSchema = borsh.struct([
       borsh.u64("discriminator"),
-      borsh.u8("room_id"),
+      borsh.u8("match_id"),
       borsh.u64("sol_bet_amount"),
       borsh.u64("duration"),
       borsh.bool("is_finished"),
       borsh.publicKey("host"),
-      borsh.publicKey("guest"),
+      borsh.publicKey("challenger"),
       borsh.i64("start_timestamp"),
       borsh.i64("end_timestamp"),
       borsh.publicKey("winner"),
@@ -243,8 +249,8 @@ describe("cfl-program", () => {
     return decodedData;
   };
 
-  it("Kickoff", async () => {
-    let [guestSquad] = PublicKey.findProgramAddressSync(
+  it("Challenge", async () => {
+    let [challengerSquad] = PublicKey.findProgramAddressSync(
       [
         Buffer.from(SQUAD_SEED),
         keypairDeployer.publicKey.toBuffer(),
@@ -255,18 +261,18 @@ describe("cfl-program", () => {
 
     const id = 0;
 
-    let [room] = PublicKey.findProgramAddressSync(
-      [Buffer.from(ROOM_SEED), Buffer.from(new Uint8Array([id]))],
+    let [match] = PublicKey.findProgramAddressSync(
+      [Buffer.from(MATCH_SEED), Buffer.from(new Uint8Array([id]))],
       program.programId,
     );
 
     const ix = await program.methods
-      .kickoff(id)
+      .challenge(id)
       .accounts({
         // @ts-ignore
-        guestSquad,
+        challengerSquad,
         // @ts-ignore
-        room,
+        match,
         user: keypairDeployer.publicKey,
       })
       .instruction();
@@ -278,7 +284,7 @@ describe("cfl-program", () => {
     });
   });
 
-  it("Get Room Created", async () => {
+  it("Get Match Created", async () => {
     const allAccountsOwned = await connection.getProgramAccounts(
       new PublicKey(program.idl.address),
       {
@@ -289,20 +295,20 @@ describe("cfl-program", () => {
     // console.log(allAccountsOwned);
 
     const decodedDatas = allAccountsOwned.map((x) => {
-      return decodeRoomAccountData(x.account.data);
+      return decodeMatchAccountData(x.account.data);
     });
-    console.log("decoded room data", JSON.stringify(decodedDatas, null, 3));
+    console.log("decoded match data", JSON.stringify(decodedDatas, null, 3));
   });
 
   it("Finalize", async () => {
     const id = 0;
 
-    let [room] = PublicKey.findProgramAddressSync(
-      [Buffer.from(ROOM_SEED), Buffer.from(new Uint8Array([id]))],
+    let [match] = PublicKey.findProgramAddressSync(
+      [Buffer.from(MATCH_SEED), Buffer.from(new Uint8Array([id]))],
       program.programId,
     );
 
-    let [guestSquad] = PublicKey.findProgramAddressSync(
+    let [winner] = PublicKey.findProgramAddressSync(
       [
         Buffer.from(SQUAD_SEED),
         keypairDeployer.publicKey.toBuffer(),
@@ -312,10 +318,10 @@ describe("cfl-program", () => {
     );
 
     const ix = await program.methods
-      .finalize(id, guestSquad)
+      .finalize(id, winner)
       .accounts({
         // @ts-ignore
-        room,
+        match,
         user: keypairDeployer.publicKey,
       })
       .instruction();
@@ -338,24 +344,24 @@ describe("cfl-program", () => {
     // console.log(allAccountsOwned);
 
     const decodedDatas = allAccountsOwned.map((x) => {
-      return decodeRoomAccountData(x.account.data);
+      return decodeMatchAccountData(x.account.data);
     });
-    console.log("decoded room data", JSON.stringify(decodedDatas, null, 3));
+    console.log("decoded match data", JSON.stringify(decodedDatas, null, 3));
   });
 
   it("Claim", async () => {
     const id = 0;
 
-    let [room] = PublicKey.findProgramAddressSync(
-      [Buffer.from(ROOM_SEED), Buffer.from(new Uint8Array([id]))],
+    let [match] = PublicKey.findProgramAddressSync(
+      [Buffer.from(MATCH_SEED), Buffer.from(new Uint8Array([id]))],
       program.programId,
     );
 
     const ix = await program.methods
-      .claimReward(id)
+      .claimSol(id)
       .accounts({
         // @ts-ignore
-        room,
+        match,
         user: keypairDeployer.publicKey,
       })
       .instruction();
@@ -367,7 +373,7 @@ describe("cfl-program", () => {
     });
   });
 
-  it("Get Room Created", async () => {
+  it("Get Match Created", async () => {
     const allAccountsOwned = await connection.getProgramAccounts(
       new PublicKey(program.idl.address),
       {

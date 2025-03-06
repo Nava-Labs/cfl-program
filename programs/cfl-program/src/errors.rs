@@ -2,21 +2,15 @@ use anchor_lang::prelude::*;
 
 #[error_code]
 pub enum CustomError {
-    #[msg("Invalid amount to swap")]
-    InvalidAmount,
+    #[msg("Invalid squad")]
+    InvalidSquad,
 
-    #[msg("Token amount is too big to sell")]
-    TokenAmountToSellTooBig,
+    #[msg("Match expired")]
+    MatchExpired,
 
-    #[msg("SOL is not enough in vault")]
-    NotEnoughSolInVault,
+    #[msg("Sol Claimed!")]
+    SolClaimed,
 
-    #[msg("Token is not enough in vault")]
-    NotEnoughTokenInVault,
-
-    #[msg("Slippage error")]
-    InvalidSlippage,
-
-    #[msg("Out of bonding curve range")]
-    OutOfBondingCurveRange,
+    #[msg("Match Started")]
+    MatchStarted,
 }

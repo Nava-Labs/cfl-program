@@ -4,23 +4,23 @@ use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2
 
 use anchor_lang::prelude::*;
 
-pub fn finalize(ctx: Context<Finalize>, room_id: u8, winner: Pubkey) -> Result<()> {
-    let room = &mut ctx.accounts.room;
+pub fn finalize(ctx: Context<Finalize>, _match_id: u8, winner: Pubkey) -> Result<()> {
+    let match_account = &mut ctx.accounts.match_account;
 
-    room.finalize(winner);
+    match_account.finalize(winner);
 
     Ok(())
 }
 
 #[derive(Accounts)]
-#[instruction(room_id: u8)]
+#[instruction(match_id: u8)]
 pub struct Finalize<'info> {
     #[account(
         mut,
-        seeds = [Room::SEED.as_bytes(), room_id.to_le_bytes().as_ref()],
+        seeds = [Match::SEED.as_bytes(), match_id.to_le_bytes().as_ref()],
         bump
     )]
-    pub room: Account<'info, Room>,
+    pub match_account: Account<'info, Match>,
 
     #[account(mut)]
     pub user: Signer<'info>,

@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("D6Y6qVKNMTqzafrZfrUWshsbJWmR17b4jdChXruX7KtV");
+declare_id!("9qZxXes4CN5KXSShSDbAHzFBd4Y5j6iqRjZrDMCDbT9X");
 
 pub mod errors;
 pub mod instructions;
@@ -21,28 +21,36 @@ pub mod cfl_program {
         ctx: Context<CreateSquad>,
         squad_index: u8,
         price_feed_ids: Vec<String>,
+        weight_percentage: Vec<f64>,
     ) -> Result<()> {
-        instructions::create_squad(ctx, squad_index, price_feed_ids)
+        instructions::create_squad(ctx, squad_index, price_feed_ids, weight_percentage)
     }
 
-    pub fn create_room(
-        ctx: Context<CreateRoom>,
-        room_id: u8,
+    pub fn create_match(
+        ctx: Context<CreateMatch>,
+        match_id: u8,
+        start_timestamp: i64,
+        duration: i64,
         sol_bet_amount_in_lamports: u64,
-        duration: u64,
     ) -> Result<()> {
-        instructions::create_room(ctx, room_id, sol_bet_amount_in_lamports, duration)
+        instructions::create_match(
+            ctx,
+            match_id,
+            start_timestamp,
+            duration,
+            sol_bet_amount_in_lamports,
+        )
     }
 
-    pub fn kickoff(ctx: Context<Kickoff>, room_id: u8) -> Result<()> {
-        instructions::kickoff(ctx, room_id)
+    pub fn challenge(ctx: Context<Challenge>, match_id: u8) -> Result<()> {
+        instructions::challenge(ctx, match_id)
     }
 
-    pub fn finalize(ctx: Context<Finalize>, room_id: u8, winner: Pubkey) -> Result<()> {
-        instructions::finalize(ctx, room_id, winner)
+    pub fn finalize(ctx: Context<Finalize>, match_id: u8, winner: Pubkey) -> Result<()> {
+        instructions::finalize(ctx, match_id, winner)
     }
 
-    pub fn claim_reward(ctx: Context<ClaimReward>, room_id: u8) -> Result<()> {
-        instructions::claim_reward(ctx, room_id)
+    pub fn claim_sol(ctx: Context<ClaimSol>, match_id: u8) -> Result<()> {
+        instructions::claim_sol(ctx, match_id)
     }
 }
