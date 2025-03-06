@@ -29,23 +29,45 @@ const PROFILE_SEED = "Profile";
 const MATCH_SEED = "Match";
 
 async function main() {
-  // await createSquad();
-  // const allSquads = await getAllSquad();
-  // const filtered = allSquads.filter(
-  //   (x) => x.owner == keypairDeployer.publicKey.toString(),
-  // );
-  // console.log(filtered);
-  const id = 0;
-  // const start = new BN(1741266000);
-  // const duration = new BN(604800);
-  // const sol = new BN(0.01 * LAMPORTS_PER_SOL);
-  // await createMatch(id, start, duration, sol);
-  //
-  await challenge(0);
+  // const pf1 =
+  //   "0xb9312a7ee50e189ef045aa3c7842e099b061bd9bdc99ac645956c3b660dc8cce";
+  // const pf2 =
+  //   "0x17894b9fff49cd07efeab94a0d02db16f158efe04e0dee1db6af5f069082ce83";
+  // const pf3 =
+  //   "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d";
+  // const pf4 =
+  //   "0x656cc2a39dd795bdecb59de810d4f4d1e74c25fe4c42d0bf1c65a38d74df48e9";
+  // const pf5 =
+  //   "0x63a45218d6b13ffd28ca04748615511bf70eff80a3411c97d96b8ed74a6decab";
+  // const pfs = [pf1, pf2, pf3, pf4, pf5];
+  // const percentages = [
+  //   parseFloat("20"),
+  //   parseFloat("20"),
+  //   parseFloat("20"),
+  //   parseFloat("20"),
+  //   parseFloat("20"),
+  // ];
+  // const squadIndex = 0;
+  // await createSquad(pfs, percentages, squadIndex);
 
-  // await getAllRoom();
-  //
-  // const id = 0
+  /// =================================================== \\\
+
+  const matchId = 0;
+  const start = new BN(1741266000);
+  const duration = new BN(604800);
+  const sol = new BN(0.01 * LAMPORTS_PER_SOL);
+  const squadIndex = 0;
+  await createMatch(matchId, start, duration, sol, squadIndex);
+
+  /// =================================================== \\\
+
+  // const matchId = 0;
+  // const challengerSquadIndex = 0;
+  // await challenge(matchId, challengerSquadIndex);
+  /// =================================================== \\\
+
+  // const matchId = 0;
+  // const winner = new PublicKey("");
   // await finalize();
 }
 
@@ -64,28 +86,12 @@ const wallet = new anchor.Wallet(keypairDeployer);
 
 const program = new Program(IDL as CflProgram, provider);
 
-async function createSquad() {
+async function createSquad(
+  pfs: string[],
+  percentage: number[],
+  squadIndex: number,
+) {
   try {
-    const pf1 =
-      "0xb9312a7ee50e189ef045aa3c7842e099b061bd9bdc99ac645956c3b660dc8cce";
-    const pf2 =
-      "0x17894b9fff49cd07efeab94a0d02db16f158efe04e0dee1db6af5f069082ce83";
-    const pf3 =
-      "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d";
-    const pf4 =
-      "0x656cc2a39dd795bdecb59de810d4f4d1e74c25fe4c42d0bf1c65a38d74df48e9";
-    const pf5 =
-      "0x63a45218d6b13ffd28ca04748615511bf70eff80a3411c97d96b8ed74a6decab";
-
-    let pfs = [pf1, pf2, pf3, pf4, pf5];
-    let percentages = [
-      parseFloat("20"),
-      parseFloat("20"),
-      parseFloat("20"),
-      parseFloat("20"),
-      parseFloat("20"),
-    ];
-
     let [profile] = PublicKey.findProgramAddressSync(
       [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
       program.programId,
@@ -95,13 +101,13 @@ async function createSquad() {
       [
         Buffer.from(SQUAD_SEED),
         keypairDeployer.publicKey.toBuffer(),
-        Buffer.from(new Uint8Array([1])),
+        Buffer.from(new Uint8Array([squadIndex])),
       ],
       program.programId,
     );
 
     const tx = await program.methods
-      .createSquad(1, pfs, percentages)
+      .createSquad(squadIndex, pfs, percentage)
       .accounts({
         // @ts-ignore
         squad,
@@ -117,24 +123,30 @@ async function createSquad() {
   }
 }
 
-async function createMatch(id: number, start: any, duration: any, sol: any) {
+async function createMatch(
+  matchId: number,
+  start: any,
+  duration: any,
+  sol: any,
+  squadIndex: number,
+) {
   try {
     let [squad] = PublicKey.findProgramAddressSync(
       [
         Buffer.from(SQUAD_SEED),
         keypairDeployer.publicKey.toBuffer(),
-        Buffer.from(new Uint8Array([0])),
+        Buffer.from(new Uint8Array([squadIndex])),
       ],
       program.programId,
     );
 
     let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), Buffer.from(new Uint8Array([id]))],
+      [Buffer.from(MATCH_SEED), Buffer.from(new Uint8Array([matchId]))],
       program.programId,
     );
 
     const tx = await program.methods
-      .createMatch(id, start, duration, sol)
+      .createMatch(matchId, start, duration, sol)
       .accounts({
         // @ts-ignore
         squad,
@@ -151,24 +163,24 @@ async function createMatch(id: number, start: any, duration: any, sol: any) {
   }
 }
 
-async function challenge(id: number) {
+async function challenge(matchId: number, challengerSquadIndex: number) {
   try {
     let [challengerSquad] = PublicKey.findProgramAddressSync(
       [
         Buffer.from(SQUAD_SEED),
         keypairDeployer.publicKey.toBuffer(),
-        Buffer.from(new Uint8Array([1])),
+        Buffer.from(new Uint8Array([challengerSquadIndex])),
       ],
       program.programId,
     );
 
     let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), Buffer.from(new Uint8Array([id]))],
+      [Buffer.from(MATCH_SEED), Buffer.from(new Uint8Array([matchId]))],
       program.programId,
     );
 
     const tx = await program.methods
-      .challenge(id)
+      .challenge(matchId)
       .accounts({
         // @ts-ignore
         challengerSquad,
@@ -185,23 +197,14 @@ async function challenge(id: number) {
   }
 }
 
-async function finalize(id: any) {
+async function finalize(matchId: any, winner: PublicKey) {
   let [match] = PublicKey.findProgramAddressSync(
-    [Buffer.from(MATCH_SEED), Buffer.from(new Uint8Array([id]))],
-    program.programId,
-  );
-
-  let [challengerSquad] = PublicKey.findProgramAddressSync(
-    [
-      Buffer.from(SQUAD_SEED),
-      keypairDeployer.publicKey.toBuffer(),
-      Buffer.from(new Uint8Array([1])),
-    ],
+    [Buffer.from(MATCH_SEED), Buffer.from(new Uint8Array([matchId]))],
     program.programId,
   );
 
   const ix = await program.methods
-    .finalize(id, challengerSquad)
+    .finalize(matchId, winner)
     .accounts({
       // @ts-ignore
       match,
