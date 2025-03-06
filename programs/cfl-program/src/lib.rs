@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("HBkN6M5QsGifoRvYDN4PDxDfyURTKWYQdzzbKBrGWyRs");
+declare_id!("3eoekLEpwyfMmuwx5oN3Wk4Y4bFX563q8FNWbFxSPGce");
 
 pub mod errors;
 pub mod instructions;
@@ -28,7 +28,7 @@ pub mod cfl_program {
 
     pub fn create_match(
         ctx: Context<CreateMatch>,
-        match_id: u8,
+        match_id: u64,
         start_timestamp: i64,
         duration: i64,
         sol_bet_amount_in_lamports: u64,
@@ -42,15 +42,15 @@ pub mod cfl_program {
         )
     }
 
-    pub fn challenge(ctx: Context<Challenge>, match_id: u8) -> Result<()> {
+    pub fn challenge(ctx: Context<Challenge>, match_id: u64) -> Result<()> {
         instructions::challenge(ctx, match_id)
     }
 
-    pub fn finalize(ctx: Context<Finalize>, match_id: u8, winner: Pubkey) -> Result<()> {
+    pub fn finalize(ctx: Context<Finalize>, match_id: u64, winner: Pubkey) -> Result<()> {
         instructions::finalize(ctx, match_id, winner)
     }
 
-    pub fn claim_sol(ctx: Context<ClaimSol>, match_id: u8) -> Result<()> {
+    pub fn claim_sol(ctx: Context<ClaimSol>, match_id: u64) -> Result<()> {
         instructions::claim_sol(ctx, match_id)
     }
 }

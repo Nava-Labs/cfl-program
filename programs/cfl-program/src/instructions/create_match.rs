@@ -5,21 +5,22 @@ use anchor_lang::{prelude::*, system_program};
 
 pub fn create_match(
     ctx: Context<CreateMatch>,
-    match_id: u8,
+    match_id: u64,
     start_timestamp: i64,
     duration: i64,
     sol_bet_amount_in_lamports: u64,
 ) -> Result<()> {
-    let squad: &mut AccountInfo = &mut ctx.accounts.squad.to_account_info();
+    let host_squad: &mut AccountInfo = &mut ctx.accounts.host_squad.to_account_info();
     let match_account = &mut ctx.accounts.match_account;
     let user = &mut ctx.accounts.user;
 
     match_account.set_inner(Match::new(
         match_id,
+        host_squad.key(),
+        user.key(),
         sol_bet_amount_in_lamports,
-        start_timestamp,
         duration,
-        squad.key(),
+        start_timestamp,
         match_account.bump,
     ));
 
@@ -37,11 +38,11 @@ pub fn create_match(
 }
 
 #[derive(Accounts)]
-#[instruction(match_id: u8)]
+#[instruction(match_id: u64)]
 pub struct CreateMatch<'info> {
     /// CHECK:
     #[account(mut)]
-    pub squad: UncheckedAccount<'info>,
+    pub host_squad: UncheckedAccount<'info>,
 
     #[account(
         init,

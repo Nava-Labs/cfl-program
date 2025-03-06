@@ -3,12 +3,12 @@ use crate::state::*;
 
 use anchor_lang::{prelude::*, system_program};
 
-pub fn challenge(ctx: Context<Challenge>, _match_id: u8) -> Result<()> {
+pub fn challenge(ctx: Context<Challenge>, _match_id: u64) -> Result<()> {
     let user = &mut ctx.accounts.user;
     let match_account = &mut ctx.accounts.match_account;
-    let challenger = &mut ctx.accounts.challenger_squad;
+    let challenger_squad = &mut ctx.accounts.challenger_squad;
 
-    match_account.start(challenger.key());
+    match_account.challenge(challenger_squad.key(), user.key());
 
     let transfer_ctx = CpiContext::new(
         ctx.accounts.system_program.to_account_info(),
@@ -24,7 +24,7 @@ pub fn challenge(ctx: Context<Challenge>, _match_id: u8) -> Result<()> {
 }
 
 #[derive(Accounts)]
-#[instruction(match_id: u8)]
+#[instruction(match_id: u64)]
 pub struct Challenge<'info> {
     /// CHECK:
     #[account(mut)]

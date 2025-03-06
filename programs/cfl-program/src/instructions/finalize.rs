@@ -4,7 +4,7 @@ use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2
 
 use anchor_lang::prelude::*;
 
-pub fn finalize(ctx: Context<Finalize>, _match_id: u8, winner: Pubkey) -> Result<()> {
+pub fn finalize(ctx: Context<Finalize>, _match_id: u64, winner: Pubkey) -> Result<()> {
     let match_account = &mut ctx.accounts.match_account;
 
     match_account.finalize(winner);
@@ -13,7 +13,7 @@ pub fn finalize(ctx: Context<Finalize>, _match_id: u8, winner: Pubkey) -> Result
 }
 
 #[derive(Accounts)]
-#[instruction(match_id: u8)]
+#[instruction(match_id: u64)]
 pub struct Finalize<'info> {
     #[account(
         mut,

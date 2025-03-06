@@ -3,7 +3,7 @@ use crate::state::*;
 
 use anchor_lang::prelude::*;
 
-pub fn claim_sol(ctx: Context<ClaimSol>, _match_id: u8) -> Result<()> {
+pub fn claim_sol(ctx: Context<ClaimSol>, _match_id: u64) -> Result<()> {
     let match_account = &mut ctx.accounts.match_account;
     let user = &mut ctx.accounts.user;
     let rent = &mut ctx.accounts.rent;
@@ -19,7 +19,7 @@ pub fn claim_sol(ctx: Context<ClaimSol>, _match_id: u8) -> Result<()> {
 }
 
 #[derive(Accounts)]
-#[instruction(match_id: u8)]
+#[instruction(match_id: u64)]
 pub struct ClaimSol<'info> {
     #[account(
         mut,
