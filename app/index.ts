@@ -31,43 +31,55 @@ const MATCH_SEED = "Match";
 
 async function main() {
   // const pf1 =
-  //   "0xb9312a7ee50e189ef045aa3c7842e099b061bd9bdc99ac645956c3b660dc8cce";
+  //   "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43";
   // const pf2 =
-  //   "0x17894b9fff49cd07efeab94a0d02db16f158efe04e0dee1db6af5f069082ce83";
+  //   "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace";
   // const pf3 =
-  //   "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d";
+  //   "0x2f95862b045670cd22bee3114c39763a4a08beeb663b145d283c31d7d1101c4f";
   // const pf4 =
-  //   "0x656cc2a39dd795bdecb59de810d4f4d1e74c25fe4c42d0bf1c65a38d74df48e9";
+  //   "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d";
   // const pf5 =
-  //   "0x63a45218d6b13ffd28ca04748615511bf70eff80a3411c97d96b8ed74a6decab";
-  // const pfs = [pf1, pf2, pf3, pf4, pf5];
+  //   "0xec5d399846a9209f3fe5881d70aae9268c94339ff9817e8d18ff19fa05eea1c8";
+  // const pf6 =
+  //   "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d";
+  // const pf7 =
+  //   "0x8ac0c70fff57e9aefdf5edf44b51d62c2d433653cbb2cf5cc06bb115af04d221";
+  // const pf8 =
+  //   "0x67aed5a24fdad045475e7195c98a98aea119c763f272d4523f5bac93a4f33c2b";
+  // const pf9 =
+  //   "0x3728e591097635310e6341af53db8b7ee42da9b3a8d918f9463ce9cca886dfbd";
+  // const pf10 =
+  //   "0xb7a8eba68a997cd0210c2e1e4ee811ad2d174b3611c22d9ebf16f4cb7e9ba850";
+
+  // const pfs = [pf1, pf2, pf3, pf4, pf5, pf6, pf7, pf8];
   // const percentages = [
-  //   parseFloat("20"),
-  //   parseFloat("20"),
-  //   parseFloat("20"),
-  //   parseFloat("20"),
-  //   parseFloat("20"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   // parseFloat("10"),
+  //   // parseFloat("10"),
   // ];
-  // const squadIndex = 0;
+  // const squadIndex = 2;
   // await createSquad(pfs, percentages, squadIndex);
 
   /// =================================================== \\\
-
-  const matchId = 0;
-  const start = new BN(1741266000);
+  const matchId = new BN(1);
+  const start = new BN(1741294800);
   const duration = new BN(604800);
   const sol = new BN(0.01 * LAMPORTS_PER_SOL);
   const squadIndex = 0;
   await createMatch(matchId, start, duration, sol, squadIndex);
-
-  /// =================================================== \\\
-
-  // const matchId = 0;
+  // / =================================================== \\\
+  // const matchId = new BN(0);
   // const challengerSquadIndex = 0;
   // await challenge(matchId, challengerSquadIndex);
   /// =================================================== \\\
-
-  // const matchId = 0;
+  // const matchId = new BN(0);
   // const winner = new PublicKey("");
   // await finalize();
 }
@@ -125,14 +137,14 @@ async function createSquad(
 }
 
 async function createMatch(
-  matchId: number,
+  matchId: any,
   start: any,
   duration: any,
   sol: any,
   squadIndex: number,
 ) {
   try {
-    let [squad] = PublicKey.findProgramAddressSync(
+    let [hostSquad] = PublicKey.findProgramAddressSync(
       [
         Buffer.from(SQUAD_SEED),
         keypairDeployer.publicKey.toBuffer(),
@@ -142,7 +154,7 @@ async function createMatch(
     );
 
     let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), Buffer.from(new Uint8Array([matchId]))],
+      [Buffer.from(MATCH_SEED), matchId.toBuffer("be", 2)],
       program.programId,
     );
 
@@ -150,7 +162,7 @@ async function createMatch(
       .createMatch(matchId, start, duration, sol)
       .accounts({
         // @ts-ignore
-        squad,
+        hostSquad,
         // @ts-ignore
         match,
         user: keypairDeployer.publicKey,
@@ -164,7 +176,7 @@ async function createMatch(
   }
 }
 
-async function challenge(matchId: number, challengerSquadIndex: number) {
+async function challenge(matchId: any, challengerSquadIndex: number) {
   try {
     let [challengerSquad] = PublicKey.findProgramAddressSync(
       [
@@ -176,7 +188,7 @@ async function challenge(matchId: number, challengerSquadIndex: number) {
     );
 
     let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), Buffer.from(new Uint8Array([matchId]))],
+      [Buffer.from(MATCH_SEED), matchId.toBuffer("be", 2)],
       program.programId,
     );
 
