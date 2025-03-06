@@ -1,13 +1,23 @@
 use crate::errors::CustomError;
 use crate::state::*;
 
-use anchor_lang::prelude::*;
+use anchor_lang::{prelude::*, system_program};
 
 pub fn challenge(ctx: Context<Challenge>, _match_id: u8) -> Result<()> {
     let match_account = &mut ctx.accounts.match_account;
-    let challenger = ctx.accounts.challenger_squad.key();
+    let challenger = &mut ctx.accounts.challenger_squad;
 
-    match_account.start(challenger);
+    match_account.start(challenger.key());
+
+    let transfer_ctx = CpiContext::new(
+        ctx.accounts.system_program.to_account_info(),
+        system_program::Transfer {
+            from: challenger.to_account_info(),
+            to: match_account.to_account_info(),
+        },
+    );
+
+    system_program::transfer(transfer_ctx, match_account.sol_bet_amount)?;
 
     Ok(())
 }
