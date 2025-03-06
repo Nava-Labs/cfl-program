@@ -6,9 +6,14 @@ use anchor_lang::prelude::*;
 pub fn claim_sol(ctx: Context<ClaimSol>, _match_id: u8) -> Result<()> {
     let match_account = &mut ctx.accounts.match_account;
     let user = &mut ctx.accounts.user;
+    let rent = &mut ctx.accounts.rent;
 
-    **match_account.to_account_info().try_borrow_mut_lamports()? -= match_account.sol_bet_amount;
-    **user.try_borrow_mut_lamports()? += match_account.sol_bet_amount;
+    let account_rent = Rent::minimum_balance(rent, Match::ACCOUNT_SIZE);
+
+    let sol_to_withdraw = match_account.get_lamports() - account_rent;
+
+    **match_account.to_account_info().try_borrow_mut_lamports()? -= sol_to_withdraw;
+    **user.try_borrow_mut_lamports()? += sol_to_withdraw;
 
     Ok(())
 }
@@ -27,4 +32,5 @@ pub struct ClaimSol<'info> {
     pub user: Signer<'info>,
 
     pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
 }
