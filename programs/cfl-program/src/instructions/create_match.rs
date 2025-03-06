@@ -10,7 +10,7 @@ pub fn create_match(
     duration: i64,
     sol_bet_amount_in_lamports: u64,
 ) -> Result<()> {
-    let challenger_squad: &mut AccountInfo = &mut ctx.accounts.challenger_squad.to_account_info();
+    let squad: &mut AccountInfo = &mut ctx.accounts.squad.to_account_info();
     let match_account = &mut ctx.accounts.match_account;
     let user = &mut ctx.accounts.user;
 
@@ -19,7 +19,7 @@ pub fn create_match(
         sol_bet_amount_in_lamports,
         start_timestamp,
         duration,
-        challenger_squad.key(),
+        squad.key(),
         match_account.bump,
     ));
 
@@ -41,7 +41,7 @@ pub fn create_match(
 pub struct CreateMatch<'info> {
     /// CHECK:
     #[account(mut)]
-    pub challenger_squad: UncheckedAccount<'info>,
+    pub squad: UncheckedAccount<'info>,
 
     #[account(
         init,
