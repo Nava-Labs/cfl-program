@@ -35,11 +35,14 @@ async function main() {
   //   (x) => x.owner == keypairDeployer.publicKey.toString(),
   // );
   // console.log(filtered);
-  // const id = 0
-  // const start = new BN(1234);
-  // const duration = new BN(123);
-  // const sol = new BN(0.12 * LAMPORTS_PER_SOL);
-  // await createRoom();
+  const id = 0;
+  // const start = new BN(1741266000);
+  // const duration = new BN(604800);
+  // const sol = new BN(0.01 * LAMPORTS_PER_SOL);
+  // await createMatch(id, start, duration, sol);
+  //
+  await challenge(0);
+
   // await getAllRoom();
   //
   // const id = 0
@@ -64,17 +67,23 @@ const program = new Program(IDL as CflProgram, provider);
 async function createSquad() {
   try {
     const pf1 =
-      "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43";
+      "0xb9312a7ee50e189ef045aa3c7842e099b061bd9bdc99ac645956c3b660dc8cce";
     const pf2 =
-      "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d";
+      "0x17894b9fff49cd07efeab94a0d02db16f158efe04e0dee1db6af5f069082ce83";
     const pf3 =
+      "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d";
+    const pf4 =
       "0x656cc2a39dd795bdecb59de810d4f4d1e74c25fe4c42d0bf1c65a38d74df48e9";
+    const pf5 =
+      "0x63a45218d6b13ffd28ca04748615511bf70eff80a3411c97d96b8ed74a6decab";
 
-    let pfs = [pf1, pf2, pf3];
+    let pfs = [pf1, pf2, pf3, pf4, pf5];
     let percentages = [
-      parseFloat("1.5"),
-      parseFloat("20.5"),
-      parseFloat("66.667"),
+      parseFloat("20"),
+      parseFloat("20"),
+      parseFloat("20"),
+      parseFloat("20"),
+      parseFloat("20"),
     ];
 
     let [profile] = PublicKey.findProgramAddressSync(
@@ -86,13 +95,13 @@ async function createSquad() {
       [
         Buffer.from(SQUAD_SEED),
         keypairDeployer.publicKey.toBuffer(),
-        Buffer.from(new Uint8Array([0])),
+        Buffer.from(new Uint8Array([1])),
       ],
       program.programId,
     );
 
     const tx = await program.methods
-      .createSquad(0, pfs, percentages)
+      .createSquad(1, pfs, percentages)
       .accounts({
         // @ts-ignore
         squad,
@@ -130,7 +139,41 @@ async function createMatch(id: number, start: any, duration: any, sol: any) {
         // @ts-ignore
         squad,
         // @ts-ignore
-        room,
+        match,
+        user: keypairDeployer.publicKey,
+      })
+      .signers([keypairDeployer])
+      .rpc();
+
+    console.log("Transaction signature", tx);
+  } catch (error) {
+    console.error("Error initalize:", error);
+  }
+}
+
+async function challenge(id: number) {
+  try {
+    let [challengerSquad] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(SQUAD_SEED),
+        keypairDeployer.publicKey.toBuffer(),
+        Buffer.from(new Uint8Array([1])),
+      ],
+      program.programId,
+    );
+
+    let [match] = PublicKey.findProgramAddressSync(
+      [Buffer.from(MATCH_SEED), Buffer.from(new Uint8Array([id]))],
+      program.programId,
+    );
+
+    const tx = await program.methods
+      .challenge(id)
+      .accounts({
+        // @ts-ignore
+        challengerSquad,
+        // @ts-ignore
+        match,
         user: keypairDeployer.publicKey,
       })
       .signers([keypairDeployer])
