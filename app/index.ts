@@ -12,6 +12,7 @@ import {
   Transaction,
   sendAndConfirmTransaction,
   ComputeBudgetProgram,
+  SYSVAR_RENT_PUBKEY,
 } from "@solana/web3.js";
 import { CflProgram } from "../target/types/cfl_program";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
@@ -209,6 +210,7 @@ async function finalize(matchId: any, winner: PublicKey) {
       // @ts-ignore
       match,
       user: keypairDeployer.publicKey,
+      rent: SYSVAR_RENT_PUBKEY,
     })
     .instruction();
 
