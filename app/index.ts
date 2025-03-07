@@ -31,25 +31,25 @@ const MATCH_SEED = "Match";
 
 async function main() {
   // const pf1 =
-  //   "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43";
+  //   "0x0fc54579a29ba60a08fdb5c28348f22fd3bec18e221dd6b90369950db638a5a7";
   // const pf2 =
-  //   "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace";
+  //   "0x45b75908a1965a86080a26d9f31ab69d045d4dda73d1394e0d3693ce00d40e6f";
   // const pf3 =
-  //   "0x2f95862b045670cd22bee3114c39763a4a08beeb663b145d283c31d7d1101c4f";
+  //   "0xa80e97f70f6a4a8a0273822fb86d51b2bdb9a16ce0edb7ea8c8b84cbaecb5ce5";
   // const pf4 =
-  //   "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d";
+  //   "0x7358313661dcd4f842a1423aa4f7a05f009001c9113201c719621d3f1aa80a73";
   // const pf5 =
-  //   "0xec5d399846a9209f3fe5881d70aae9268c94339ff9817e8d18ff19fa05eea1c8";
+  //   "0x58cd29ef0e714c5affc44f269b2c1899a52da4169d7acc147b9da692e6953608";
   // const pf6 =
-  //   "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d";
+  //   "0x3c987d95da67ceb12705b22448200568c15b6242796cacc21c11f622e74cfffb";
   // const pf7 =
-  //   "0x8ac0c70fff57e9aefdf5edf44b51d62c2d433653cbb2cf5cc06bb115af04d221";
+  //   "0xd6f83dfeaff95d596ddec26af2ee32f391c206a183b161b7980821860eeef2f5";
   // const pf8 =
-  //   "0x67aed5a24fdad045475e7195c98a98aea119c763f272d4523f5bac93a4f33c2b";
+  //   "0x9b5729efe3d68e537cdcb2ca70444dea5f06e1660b562632609757076d0b9448";
   // const pf9 =
-  //   "0x3728e591097635310e6341af53db8b7ee42da9b3a8d918f9463ce9cca886dfbd";
+  //   "0x514aed52ca5294177f20187ae883cec4a018619772ddce41efcc36a6448f5d5d";
   // const pf10 =
-  //   "0xb7a8eba68a997cd0210c2e1e4ee811ad2d174b3611c22d9ebf16f4cb7e9ba850";
+  //   "0x1a483c4a63876d286991ac0d6e090298db42e88c3826b6e0cff89daca498eed5";
 
   // const pfs = [pf1, pf2, pf3, pf4, pf5, pf6, pf7, pf8];
   // const percentages = [
@@ -61,18 +61,18 @@ async function main() {
   //   parseFloat("10"),
   //   parseFloat("10"),
   //   parseFloat("10"),
-  //   // parseFloat("10"),
-  //   // parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
   // ];
   // const squadIndex = 2;
   // await createSquad(pfs, percentages, squadIndex);
 
   /// =================================================== \\\
-  const matchId = new BN(1);
-  const start = new BN(1741294800);
+  const matchId = new BN(2);
+  const start = new BN(1741384656);
   const duration = new BN(604800);
   const sol = new BN(0.01 * LAMPORTS_PER_SOL);
-  const squadIndex = 0;
+  const squadIndex = 2;
   await createMatch(matchId, start, duration, sol, squadIndex);
   // / =================================================== \\\
   // const matchId = new BN(0);
