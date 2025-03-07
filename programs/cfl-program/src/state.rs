@@ -80,12 +80,13 @@ pub struct Match {
     pub is_finished: bool,
     pub winner: Pubkey,
     pub bump: u8,
+    pub match_type: u8,
 }
 
 impl Match {
     pub const SEED: &'static str = "Match";
 
-    pub const ACCOUNT_SIZE: usize = 8 + 8 + 32 + 32 + 32 + 32 + 8 + 8 + 8 + 8 + 1 + 32 + 1;
+    pub const ACCOUNT_SIZE: usize = 8 + 8 + 32 + 32 + 32 + 32 + 8 + 8 + 8 + 8 + 1 + 32 + 1 + 1;
 
     pub fn new(
         match_id: u64,
@@ -95,6 +96,7 @@ impl Match {
         duration: i64,
         start_timestamp: i64,
         bump: u8,
+        match_type: u8,
     ) -> Self {
         Self {
             match_id,
@@ -109,6 +111,7 @@ impl Match {
             is_finished: false,
             winner: Pubkey::default(),
             bump,
+            match_type,
         }
     }
 

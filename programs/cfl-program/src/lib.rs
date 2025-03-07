@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("3eoekLEpwyfMmuwx5oN3Wk4Y4bFX563q8FNWbFxSPGce");
+declare_id!("92jTR9G5wQnVauybmrRAMwrzdxkaa6yyFvWj4SMkP46X");
 
 pub mod errors;
 pub mod instructions;
@@ -32,6 +32,7 @@ pub mod cfl_program {
         start_timestamp: i64,
         duration: i64,
         sol_bet_amount_in_lamports: u64,
+        match_type: u8,
     ) -> Result<()> {
         instructions::create_match(
             ctx,
@@ -39,6 +40,7 @@ pub mod cfl_program {
             start_timestamp,
             duration,
             sol_bet_amount_in_lamports,
+            match_type,
         )
     }
 

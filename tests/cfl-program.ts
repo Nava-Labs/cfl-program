@@ -211,21 +211,24 @@ describe("cfl-program", () => {
     const id = new BN(0);
 
     let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), id.toBuffer("be", 2)],
+      [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
       program.programId,
     );
+
+    console.log(match);
 
     const start = new BN(1234);
     const duration = new BN(123);
     const sol = new BN(LAMPORTS_PER_SOL);
+    const matchType = 1;
 
     const ix = await program.methods
-      .createMatch(id, start, duration, sol)
+      .createMatch(id, start, duration, sol, matchType)
       .accounts({
         // @ts-ignore
         hostSquad,
         // @ts-ignore
-        match,
+        matchAccount: match,
         user: keypairDeployer.publicKey,
       })
       .instruction();
@@ -242,7 +245,7 @@ describe("cfl-program", () => {
       new PublicKey(program.idl.address),
       {
         // dataSlice: { offset: 8, length: 32 },
-        filters: [{ dataSize: 210 }],
+        filters: [{ dataSize: 211 }],
       },
     );
     console.log(allAccountsOwned);
@@ -268,6 +271,7 @@ describe("cfl-program", () => {
       borsh.bool("is_finished"),
       borsh.publicKey("winner"),
       borsh.u8("bump"),
+      borsh.u8("match_type"),
     ]);
 
     const decodedData = borshAccountSchema.decode(buffer);
@@ -288,7 +292,7 @@ describe("cfl-program", () => {
     const id = new BN(0);
 
     let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), id.toBuffer("be", 2)],
+      [Buffer.from(MATCH_SEED), id.toBuffer("le", 2)],
       program.programId,
     );
 
@@ -315,7 +319,7 @@ describe("cfl-program", () => {
       new PublicKey(program.idl.address),
       {
         // dataSlice: { offset: 8, length: 32 },
-        filters: [{ dataSize: 210 }],
+        filters: [{ dataSize: 211 }],
       },
     );
     // console.log(allAccountsOwned);
@@ -359,12 +363,12 @@ describe("cfl-program", () => {
     });
   });
 
-  it("Get Room Created", async () => {
+  it("Get Match Created", async () => {
     const allAccountsOwned = await connection.getProgramAccounts(
       new PublicKey(program.idl.address),
       {
         // dataSlice: { offset: 8, length: 32 },
-        filters: [{ dataSize: 210 }],
+        filters: [{ dataSize: 211 }],
       },
     );
     // console.log(allAccountsOwned);
@@ -379,7 +383,7 @@ describe("cfl-program", () => {
     const id = new BN(0);
 
     let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), id.toBuffer("be", 2)],
+      [Buffer.from(MATCH_SEED), id.toBuffer("le", 2)],
       program.programId,
     );
 
@@ -404,7 +408,7 @@ describe("cfl-program", () => {
       new PublicKey(program.idl.address),
       {
         // dataSlice: { offset: 8, length: 32 },
-        filters: [{ dataSize: 210 }],
+        filters: [{ dataSize: 211 }],
       },
     );
     console.log(allAccountsOwned);
