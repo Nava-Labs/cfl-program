@@ -292,7 +292,7 @@ describe("cfl-program", () => {
     const id = new BN(0);
 
     let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), id.toBuffer("le", 2)],
+      [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
       program.programId,
     );
 
@@ -334,7 +334,7 @@ describe("cfl-program", () => {
     const id = new BN(0);
 
     let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), id.toBuffer("be", 2)],
+      [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
       program.programId,
     );
 
@@ -383,7 +383,7 @@ describe("cfl-program", () => {
     const id = new BN(0);
 
     let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), id.toBuffer("le", 2)],
+      [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
       program.programId,
     );
 

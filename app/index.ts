@@ -157,7 +157,7 @@ async function createMatch(
     );
 
     let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), matchId.toBuffer("be", 2)],
+      [Buffer.from(MATCH_SEED), matchId.toBuffer("le", 8)],
       program.programId,
     );
 
@@ -191,7 +191,7 @@ async function challenge(matchId: any, challengerSquadIndex: number) {
     );
 
     let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), matchId.toBuffer("be", 2)],
+      [Buffer.from(MATCH_SEED), matchId.toBuffer("le", 8)],
       program.programId,
     );
 
