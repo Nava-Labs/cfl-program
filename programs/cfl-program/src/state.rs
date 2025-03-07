@@ -2,17 +2,20 @@ use anchor_lang::prelude::*;
 
 #[account]
 pub struct Global {
-    pub creator: Pubkey,
+    pub match_count: u64,
 }
 
 impl Global {
     pub const SEED: &'static str = "Global";
 
-    // Discriminator (8) + creator (32)
-    pub const ACCOUNT_SIZE: usize = 8 + 32;
+    pub const ACCOUNT_SIZE: usize = 8 + 8;
 
-    pub fn new(creator: Pubkey) -> Self {
-        Self { creator }
+    pub fn new() -> Self {
+        Self { match_count: 5 }
+    }
+
+    pub fn increment(&mut self) {
+        self.match_count += 1
     }
 }
 

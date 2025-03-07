@@ -46,19 +46,17 @@ describe("cfl-program", () => {
     const tx = new Transaction().add(ix);
     tx.feePayer = keypairDeployer.publicKey;
 
-    console.log(await connection.simulateTransaction(tx));
-
     await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
       skipPreflight: false,
     });
 
-    // const [global] = PublicKey.findProgramAddressSync(
-    //   [Buffer.from(GLOBAL_SEED)],
-    //   program.programId,
-    // );
+    const [global] = PublicKey.findProgramAddressSync(
+      [Buffer.from(GLOBAL_SEED)],
+      program.programId,
+    );
 
-    // let state = await program.account.global.fetch(global);
-    // console.log(state);
+    let state = await program.account.global.fetch(global);
+    console.log(state);
   });
 
   it("Squad Created!", async () => {
@@ -215,7 +213,10 @@ describe("cfl-program", () => {
       program.programId,
     );
 
-    console.log(match);
+    const [global] = PublicKey.findProgramAddressSync(
+      [Buffer.from(GLOBAL_SEED)],
+      program.programId,
+    );
 
     const start = new BN(1234);
     const duration = new BN(123);
@@ -229,6 +230,7 @@ describe("cfl-program", () => {
         hostSquad,
         // @ts-ignore
         matchAccount: match,
+        global,
         user: keypairDeployer.publicKey,
       })
       .instruction();
@@ -238,6 +240,9 @@ describe("cfl-program", () => {
     await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
       skipPreflight: false,
     });
+
+    let state = await program.account.global.fetch(global);
+    console.log(state);
   });
 
   it("Get Match Created", async () => {
@@ -417,5 +422,6 @@ describe("cfl-program", () => {
     //   return decodeRoomAccountData(x.account.data);
     // });
     // console.log("decoded room data", JSON.stringify(decodedDatas, null, 3));
+    //
   });
 });

@@ -5,7 +5,7 @@ use anchor_lang::prelude::*;
 
 pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
     let global = &mut ctx.accounts.global;
-    global.set_inner(Global::new(ctx.accounts.user.key()));
+    global.set_inner(Global::new());
 
     Ok(())
 }
