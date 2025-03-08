@@ -27,6 +27,8 @@ pub struct Squad {
     pub token_price_feed_ids: Vec<String>,
     #[max_len(10)]
     pub token_weight: Vec<f64>,
+    #[max_len(10)]
+    pub position_index: Vec<i8>,
     pub bump: u8,
     pub squad_index: u8,
 }
@@ -40,6 +42,7 @@ impl Squad {
         owner: Pubkey,
         token_price_feed_ids: Vec<String>,
         token_weight: Vec<f64>,
+        position_index: Vec<i8>,
         bump: u8,
         squad_index: u8,
     ) -> Self {
@@ -47,6 +50,7 @@ impl Squad {
             owner,
             token_price_feed_ids,
             token_weight,
+            position_index,
             bump,
             squad_index,
         }

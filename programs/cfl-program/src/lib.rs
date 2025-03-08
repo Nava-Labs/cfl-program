@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("FWiQpKWknqPBsqC1ipT8zrRyRd9q5ewHQ3yuWiJSKMDw");
+declare_id!("9xqgNAjAWfQdyCvHmBBTsJixpRwEs98ugKLKaA6x9r5w");
 
 pub mod errors;
 pub mod instructions;
@@ -22,8 +22,15 @@ pub mod cfl_program {
         squad_index: u8,
         price_feed_ids: Vec<String>,
         weight_percentage: Vec<f64>,
+        position_index: Vec<i8>,
     ) -> Result<()> {
-        instructions::create_squad(ctx, squad_index, price_feed_ids, weight_percentage)
+        instructions::create_squad(
+            ctx,
+            squad_index,
+            price_feed_ids,
+            weight_percentage,
+            position_index,
+        )
     }
 
     pub fn create_match(

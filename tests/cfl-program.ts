@@ -97,6 +97,8 @@ describe("cfl-program", () => {
         parseFloat("100"),
       ];
 
+      const positionIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
       let [profile] = PublicKey.findProgramAddressSync(
         [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
         program.programId,
@@ -113,7 +115,7 @@ describe("cfl-program", () => {
       console.log("Squad pda", squad.toBase58());
 
       const ix = await program.methods
-        .createSquad(i, pfs, percentages)
+        .createSquad(i, pfs, percentages, positionIndex)
         .accounts({
           // @ts-ignore
           squad,
@@ -142,7 +144,7 @@ describe("cfl-program", () => {
     const profileState = await program.account.userProfile.fetch(profile);
     console.log("Profile State", JSON.stringify(profileState, null, 3));
 
-    const squadCreated = profileState.squadCount;
+    // const squadCreated = profileState.squadCount;
 
     // for (let i = 0; i < squadCreated; i++) {
     //   const [squad] = PublicKey.findProgramAddressSync(
@@ -154,7 +156,7 @@ describe("cfl-program", () => {
     //     program.programId,
     //   );
 
-    // const squadState = await program.account.squad.fetch(squad);
+    //   const squadState = await program.account.squad.fetch(squad);
     // console.log("Squad State", JSON.stringify(squadState, null, 3));
     // }
   });
@@ -164,7 +166,7 @@ describe("cfl-program", () => {
       new PublicKey(program.idl.address),
       {
         // dataSlice: { offset: 8, length: 32 },
-        filters: [{ dataSize: 830 }],
+        filters: [{ dataSize: 844 }],
       },
     );
     // console.log(allAccountsOwned);
@@ -172,7 +174,7 @@ describe("cfl-program", () => {
     const decodedDatas = allAccountsOwned.map((x) => {
       return decodeSquadAccountData(x.account.data);
     });
-    console.log("decoded squad account", JSON.stringify(decodedDatas, null, 3));
+    console.log("decoded squad account", JSON.stringify(decodedDatas, null, 4));
   });
 
   const sleep = async (ms: number) => {
@@ -185,6 +187,7 @@ describe("cfl-program", () => {
       borsh.publicKey("owner"),
       borsh.vec(borsh.str(), "token_price_feed_ids"),
       borsh.vec(borsh.f64(), "token_weghts"),
+      borsh.vec(borsh.i8(), "position_index"),
       borsh.u8("bump"),
       borsh.u8("squad_index"),
     ]);
