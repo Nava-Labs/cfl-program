@@ -11,14 +11,34 @@ pub fn create_match(
     sol_bet_amount_in_lamports: u64,
     match_type: u8,
 ) -> Result<()> {
-    let host_squad: &mut AccountInfo = &mut ctx.accounts.host_squad.to_account_info();
     let match_account = &mut ctx.accounts.match_account;
     let user = &mut ctx.accounts.user;
     let global = &mut ctx.accounts.global;
 
+    let host_squad_account = &ctx.accounts.host_squad;
+    let mut host_squad_account_data: &[u8] = &host_squad_account.data.borrow();
+    let host_squad_data: Squad = AccountDeserialize::try_deserialize(&mut host_squad_account_data)?;
+
+    if host_squad_data.owner != user.key() {
+        return err!(CustomError::InvalidSquadOwner);
+    }
+
+    if match_id == 0 {
+        return err!(CustomError::InvalidMatchId);
+    }
+
+    let now = Clock::get().unwrap().unix_timestamp;
+    if now <= start_timestamp {
+        return err!(CustomError::InvalidTimestamp);
+    }
+
+    if duration == 0 {
+        return err!(CustomError::InvalidDuration);
+    }
+
     match_account.set_inner(Match::new(
         match_id,
-        host_squad.key(),
+        host_squad_account.key(),
         user.key(),
         sol_bet_amount_in_lamports,
         duration,
@@ -46,7 +66,7 @@ pub fn create_match(
 #[instruction(match_id: u64)]
 pub struct CreateMatch<'info> {
     /// CHECK:
-    #[account(mut)]
+    #[account(mut, owner =  crate::ID)]
     pub host_squad: UncheckedAccount<'info>,
 
     #[account(
