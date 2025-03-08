@@ -11,7 +11,7 @@ impl Global {
     pub const ACCOUNT_SIZE: usize = 8 + 8;
 
     pub fn new() -> Self {
-        Self { match_count: 5 }
+        Self { match_count: 0 }
     }
 
     pub fn increment(&mut self) {
