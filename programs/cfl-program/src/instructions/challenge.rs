@@ -6,9 +6,26 @@ use anchor_lang::{prelude::*, system_program};
 pub fn challenge(ctx: Context<Challenge>, _match_id: u64) -> Result<()> {
     let user = &mut ctx.accounts.user;
     let match_account = &mut ctx.accounts.match_account;
-    let challenger_squad = &mut ctx.accounts.challenger_squad;
+    let challenger_squad_account = &mut ctx.accounts.challenger_squad;
 
-    match_account.challenge(challenger_squad.key(), user.key());
+    let mut challenger_squad_account_data: &[u8] = &challenger_squad_account.data.borrow();
+    let challenger_squad_data: Squad =
+        AccountDeserialize::try_deserialize(&mut challenger_squad_account_data)?;
+
+    if challenger_squad_data.owner != user.key() {
+        return err!(CustomError::InvalidSquadOwner);
+    }
+
+    let now = Clock::get().unwrap().unix_timestamp;
+    if now > match_account.start_timestamp {
+        return err!(CustomError::MatchExpired);
+    }
+
+    if match_account.challenger_squad != Pubkey::default() {
+        return err!(CustomError::MatchStarted);
+    }
+
+    match_account.challenge(challenger_squad_account.key(), user.key());
 
     let transfer_ctx = CpiContext::new(
         ctx.accounts.system_program.to_account_info(),
@@ -27,7 +44,7 @@ pub fn challenge(ctx: Context<Challenge>, _match_id: u64) -> Result<()> {
 #[instruction(match_id: u64)]
 pub struct Challenge<'info> {
     /// CHECK:
-    #[account(mut)]
+    #[account(mut, owner = crate::ID)]
     pub challenger_squad: UncheckedAccount<'info>,
 
     #[account(
