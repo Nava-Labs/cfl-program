@@ -123,9 +123,6 @@ impl Match {
     }
 
     pub fn challenge(&mut self, challeger_squad: Pubkey, challenger_squad_owner: Pubkey) {
-        // let duration = self.duration as i64;
-        // let now = Clock::get().unwrap().unix_timestamp;
-
         self.challenger_squad = challeger_squad;
         self.challenger_squad_owner = challenger_squad_owner;
     }

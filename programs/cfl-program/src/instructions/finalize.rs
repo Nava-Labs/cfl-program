@@ -1,6 +1,5 @@
-use crate::errors::CustomError;
 use crate::state::*;
-use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2};
+use std::str::FromStr;
 
 use anchor_lang::prelude::*;
 
@@ -22,7 +21,7 @@ pub struct Finalize<'info> {
     )]
     pub match_account: Account<'info, Match>,
 
-    #[account(mut)]
+    #[account(mut, constraint = user.key() == Pubkey::from_str("6Ps4s9TPf9vxMCQouX5oLHETj7rJjMPRyp7BXx6c1TM7").unwrap())]
     pub user: Signer<'info>,
 
     pub system_program: Program<'info, System>,
