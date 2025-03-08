@@ -1,6 +1,5 @@
 use crate::errors::CustomError;
 use crate::state::*;
-use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, PriceUpdateV2};
 
 use anchor_lang::prelude::*;
 
@@ -14,6 +13,18 @@ pub fn create_squad(
     let profile = &mut ctx.accounts.user_profile;
     let owner = ctx.accounts.user.key();
 
+    if squad_index == 0 {
+        return err!(CustomError::InvalidSquadIndex);
+    }
+
+    if price_feed_ids.len() != 10 {
+        return err!(CustomError::InvalidPriceFeedLength);
+    }
+
+    if weight_percentage.len() != 10 {
+        return err!(CustomError::InvalidWeightPercentageLength);
+    }
+
     squad.set_inner(Squad::new(
         owner,
         price_feed_ids,
@@ -21,6 +32,7 @@ pub fn create_squad(
         squad.bump,
         squad_index,
     ));
+
     profile.increment();
 
     Ok(())
