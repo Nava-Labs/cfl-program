@@ -33,41 +33,47 @@ async function main() {
   /// =================================================== \\\
   // await initialize();
   /// =================================================== \\\
-  // const pf1 =
-  //   "0x0fc54579a29ba60a08fdb5c28348f22fd3bec18e221dd6b90369950db638a5a7";
-  // const pf2 =
-  //   "0x45b75908a1965a86080a26d9f31ab69d045d4dda73d1394e0d3693ce00d40e6f";
-  // const pf3 =
-  //   "0xa80e97f70f6a4a8a0273822fb86d51b2bdb9a16ce0edb7ea8c8b84cbaecb5ce5";
-  // const pf4 =
-  //   "0x7358313661dcd4f842a1423aa4f7a05f009001c9113201c719621d3f1aa80a73";
-  // const pf5 =
-  //   "0x58cd29ef0e714c5affc44f269b2c1899a52da4169d7acc147b9da692e6953608";
-  // const pf6 =
-  //   "0x3c987d95da67ceb12705b22448200568c15b6242796cacc21c11f622e74cfffb";
-  // const pf7 =
-  //   "0xd6f83dfeaff95d596ddec26af2ee32f391c206a183b161b7980821860eeef2f5";
-  // const pf8 =
-  //   "0x9b5729efe3d68e537cdcb2ca70444dea5f06e1660b562632609757076d0b9448";
-  // const pf9 =
-  //   "0x514aed52ca5294177f20187ae883cec4a018619772ddce41efcc36a6448f5d5d";
-  // const pf10 =
-  //   "0x1a483c4a63876d286991ac0d6e090298db42e88c3826b6e0cff89daca498eed5";
-  // const pfs = [pf1, pf2, pf3, pf4, pf5, pf6, pf7, pf8];
-  // const percentages = [
-  //   parseFloat("10"),
-  //   parseFloat("10"),
-  //   parseFloat("10"),
-  //   parseFloat("10"),
-  //   parseFloat("10"),
-  //   parseFloat("10"),
-  //   parseFloat("10"),
-  //   parseFloat("10"),
-  //   parseFloat("10"),
-  //   parseFloat("10"),
-  // ];
-  // const squadIndex = 2;
-  // await createSquad(pfs, percentages, squadIndex);
+
+  const squadIndex = 1;
+
+  const pf1 =
+    "0x0fc54579a29ba60a08fdb5c28348f22fd3bec18e221dd6b90369950db638a5a7";
+  const pf2 =
+    "0x45b75908a1965a86080a26d9f31ab69d045d4dda73d1394e0d3693ce00d40e6f";
+  const pf3 =
+    "0xa80e97f70f6a4a8a0273822fb86d51b2bdb9a16ce0edb7ea8c8b84cbaecb5ce5";
+  const pf4 =
+    "0x7358313661dcd4f842a1423aa4f7a05f009001c9113201c719621d3f1aa80a73";
+  const pf5 =
+    "0x58cd29ef0e714c5affc44f269b2c1899a52da4169d7acc147b9da692e6953608";
+  const pf6 =
+    "0x3c987d95da67ceb12705b22448200568c15b6242796cacc21c11f622e74cfffb";
+  const pf7 =
+    "0xd6f83dfeaff95d596ddec26af2ee32f391c206a183b161b7980821860eeef2f5";
+  const pf8 =
+    "0x9b5729efe3d68e537cdcb2ca70444dea5f06e1660b562632609757076d0b9448";
+  const pf9 =
+    "0x514aed52ca5294177f20187ae883cec4a018619772ddce41efcc36a6448f5d5d";
+  const pf10 =
+    "0x1a483c4a63876d286991ac0d6e090298db42e88c3826b6e0cff89daca498eed5";
+  const pfs = [pf1, pf2, pf3, pf4, pf5, pf6, pf7, pf8];
+
+  const percentages = [
+    parseFloat("10"),
+    parseFloat("10"),
+    parseFloat("10"),
+    parseFloat("10"),
+    parseFloat("10"),
+    parseFloat("10"),
+    parseFloat("10"),
+    parseFloat("10"),
+    parseFloat("10"),
+    parseFloat("10"),
+  ];
+
+  const positionIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  await createSquad(pfs, percentages, positionIndex, squadIndex);
+
   /// =================================================== \\\
   // const matchId = new BN(1);
   // const start = new BN(1741384656);
@@ -127,6 +133,7 @@ async function initialize() {
 async function createSquad(
   pfs: string[],
   percentage: number[],
+  positionIndex: number[],
   squadIndex: number,
 ) {
   try {
@@ -145,7 +152,7 @@ async function createSquad(
     );
 
     const tx = await program.methods
-      .createSquad(squadIndex, pfs, percentage)
+      .createSquad(squadIndex, pfs, percentage, positionIndex)
       .accounts({
         // @ts-ignore
         squad,
