@@ -514,4 +514,193 @@ describe("cfl-program", () => {
   const sleep = async (ms: number) => {
     return new Promise((r) => setTimeout(r, ms));
   };
+
+  it("Create squad and match", async () => {
+    const pf1 =
+      "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43";
+    const pf2 =
+      "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace";
+    const pf3 =
+      "0x2f95862b045670cd22bee3114c39763a4a08beeb663b145d283c31d7d1101c4f";
+    const pf4 =
+      "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d";
+    const pf5 =
+      "0xec5d399846a9209f3fe5881d70aae9268c94339ff9817e8d18ff19fa05eea1c8";
+    const pf6 =
+      "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d";
+    const pf7 =
+      "0x8ac0c70fff57e9aefdf5edf44b51d62c2d433653cbb2cf5cc06bb115af04d221";
+    const pf8 =
+      "0x67aed5a24fdad045475e7195c98a98aea119c763f272d4523f5bac93a4f33c2b";
+    const pf9 =
+      "0x3728e591097635310e6341af53db8b7ee42da9b3a8d918f9463ce9cca886dfbd";
+    const pf10 =
+      "0xb7a8eba68a997cd0210c2e1e4ee811ad2d174b3611c22d9ebf16f4cb7e9ba850";
+
+    const pfs = [pf1, pf2, pf3, pf4, pf5, pf6, pf7, pf8, pf9, pf10];
+    const percentages = [
+      parseFloat("10"),
+      parseFloat("20"),
+      parseFloat("30"),
+      parseFloat("40"),
+      parseFloat("50"),
+      parseFloat("60"),
+      parseFloat("70"),
+      parseFloat("80"),
+      parseFloat("90"),
+      parseFloat("100"),
+    ];
+
+    const positionIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+    let [profile] = PublicKey.findProgramAddressSync(
+      [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
+      program.programId,
+    );
+
+    const squadIndex = 2;
+
+    let [squad] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(SQUAD_SEED),
+        keypairDeployer.publicKey.toBuffer(),
+        Buffer.from(new Uint8Array([squadIndex])),
+      ],
+      program.programId,
+    );
+
+    const matchId = new BN(2);
+
+    let [match] = PublicKey.findProgramAddressSync(
+      [Buffer.from(MATCH_SEED), matchId.toBuffer("le", 8)],
+      program.programId,
+    );
+
+    const [global] = PublicKey.findProgramAddressSync(
+      [Buffer.from(GLOBAL_SEED)],
+      program.programId,
+    );
+
+    const start = new BN(1773085020);
+    const duration = new BN(123);
+    const sol = new BN(10 * LAMPORTS_PER_SOL);
+    const matchType = 1;
+
+    const ix = await program.methods
+      .createSquadAndMatch(
+        squadIndex,
+        matchId,
+        pfs,
+        percentages,
+        positionIndex,
+        start,
+        duration,
+        sol,
+        matchType,
+      )
+      .accounts({
+        // @ts-ignore
+        squad,
+        userProfile: profile,
+        matchAccount: match,
+        global,
+        user: keypairDeployer.publicKey,
+      })
+      .instruction();
+
+    const tx = new Transaction().add(ix);
+    tx.feePayer = keypairDeployer.publicKey;
+
+    console.log(await connection.simulateTransaction(tx));
+    await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
+      skipPreflight: false,
+    });
+  });
+
+  it("Create squad and challenge", async () => {
+    const pf1 =
+      "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43";
+    const pf2 =
+      "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace";
+    const pf3 =
+      "0x2f95862b045670cd22bee3114c39763a4a08beeb663b145d283c31d7d1101c4f";
+    const pf4 =
+      "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d";
+    const pf5 =
+      "0xec5d399846a9209f3fe5881d70aae9268c94339ff9817e8d18ff19fa05eea1c8";
+    const pf6 =
+      "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d";
+    const pf7 =
+      "0x8ac0c70fff57e9aefdf5edf44b51d62c2d433653cbb2cf5cc06bb115af04d221";
+    const pf8 =
+      "0x67aed5a24fdad045475e7195c98a98aea119c763f272d4523f5bac93a4f33c2b";
+    const pf9 =
+      "0x3728e591097635310e6341af53db8b7ee42da9b3a8d918f9463ce9cca886dfbd";
+    const pf10 =
+      "0xb7a8eba68a997cd0210c2e1e4ee811ad2d174b3611c22d9ebf16f4cb7e9ba850";
+
+    const pfs = [pf1, pf2, pf3, pf4, pf5, pf6, pf7, pf8, pf9, pf10];
+    const percentages = [
+      parseFloat("10"),
+      parseFloat("20"),
+      parseFloat("30"),
+      parseFloat("40"),
+      parseFloat("50"),
+      parseFloat("60"),
+      parseFloat("70"),
+      parseFloat("80"),
+      parseFloat("90"),
+      parseFloat("100"),
+    ];
+
+    const positionIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+    let [profile] = PublicKey.findProgramAddressSync(
+      [Buffer.from(PROFILE_SEED), keypairUser.publicKey.toBuffer()],
+      program.programId,
+    );
+
+    const squadIndex = 2;
+
+    let [squad] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(SQUAD_SEED),
+        keypairUser.publicKey.toBuffer(),
+        Buffer.from(new Uint8Array([squadIndex])),
+      ],
+      program.programId,
+    );
+
+    const matchId = new BN(2);
+
+    let [match] = PublicKey.findProgramAddressSync(
+      [Buffer.from(MATCH_SEED), matchId.toBuffer("le", 8)],
+      program.programId,
+    );
+
+    const ix = await program.methods
+      .createSquadAndChallenge(
+        squadIndex,
+        matchId,
+        pfs,
+        percentages,
+        positionIndex,
+      )
+      .accounts({
+        // @ts-ignore
+        squad,
+        userProfile: profile,
+        matchAccount: match,
+        user: keypairUser.publicKey,
+      })
+      .instruction();
+
+    const tx = new Transaction().add(ix);
+    tx.feePayer = keypairUser.publicKey;
+
+    console.log(await connection.simulateTransaction(tx));
+    await sendAndConfirmTransaction(connection, tx, [keypairUser], {
+      skipPreflight: false,
+    });
+  });
 });
