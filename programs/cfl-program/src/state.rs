@@ -68,7 +68,7 @@ impl UserProfile {
 
     pub const ACCOUNT_SIZE: usize = 8 + 1 + 1;
 
-    pub fn increment(&mut self) {
+    pub fn increment_squad_count(&mut self) {
         self.squad_count += 1;
     }
 }

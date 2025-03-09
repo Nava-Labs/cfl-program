@@ -39,7 +39,7 @@ pub fn create_squad(
         squad_index,
     ));
 
-    profile.increment();
+    profile.increment_squad_count();
 
     Ok(())
 }
