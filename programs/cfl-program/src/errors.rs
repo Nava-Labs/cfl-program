@@ -11,6 +11,9 @@ pub enum CustomError {
     #[msg("Invalid weight percentage")]
     InvalidWeightPercentageLength,
 
+    #[msg("Invalid position index length")]
+    InvalidPositionIndexLength,
+
     #[msg("Invalid match id")]
     InvalidMatchId,
 
@@ -34,4 +37,10 @@ pub enum CustomError {
 
     #[msg("Match Started")]
     MatchStarted,
+
+    #[msg("Same squad between Host and Challenger")]
+    SameSquad,
+
+    #[msg("Same squad owner between Host and Challenger")]
+    SameSquadOwner,
 }

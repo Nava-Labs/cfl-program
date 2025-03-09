@@ -28,7 +28,8 @@ pub fn create_match(
     }
 
     let now = Clock::get().unwrap().unix_timestamp;
-    if now <= start_timestamp {
+
+    if start_timestamp <= now {
         return err!(CustomError::InvalidTimestamp);
     }
 

@@ -16,7 +16,12 @@ pub fn challenge(ctx: Context<Challenge>, _match_id: u64) -> Result<()> {
         return err!(CustomError::InvalidSquadOwner);
     }
 
+    if challenger_squad_data.owner == match_account.host_squad_owner {
+        return err!(CustomError::SameSquadOwner);
+    }
+
     let now = Clock::get().unwrap().unix_timestamp;
+
     if now > match_account.start_timestamp {
         return err!(CustomError::MatchExpired);
     }

@@ -26,6 +26,10 @@ pub fn create_squad(
         return err!(CustomError::InvalidWeightPercentageLength);
     }
 
+    if position_index.len() != 10 {
+        return err!(CustomError::InvalidPositionIndexLength);
+    }
+
     squad.set_inner(Squad::new(
         owner,
         price_feed_ids,
