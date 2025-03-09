@@ -51,6 +51,50 @@ pub mod cfl_program {
         )
     }
 
+    pub fn create_squad_and_match(
+        ctx: Context<CreateSquadAndMatch>,
+        squad_index: u8,
+        match_id: u64,
+        price_feed_ids: Vec<String>,
+        weight_percentage: Vec<f64>,
+        position_index: Vec<i8>,
+        start_timestamp: i64,
+        duration: i64,
+        sol_bet_amount_in_lamports: u64,
+        match_type: u8,
+    ) -> Result<()> {
+        instructions::create_squad_and_match(
+            ctx,
+            squad_index,
+            match_id,
+            price_feed_ids,
+            weight_percentage,
+            position_index,
+            start_timestamp,
+            duration,
+            sol_bet_amount_in_lamports,
+            match_type,
+        )
+    }
+
+    pub fn create_squad_and_challenge(
+        ctx: Context<CreateSquadAndChallenge>,
+        squad_index: u8,
+        match_id: u64,
+        price_feed_ids: Vec<String>,
+        weight_percentage: Vec<f64>,
+        position_index: Vec<i8>,
+    ) -> Result<()> {
+        instructions::create_squad_and_challenge(
+            ctx,
+            squad_index,
+            match_id,
+            price_feed_ids,
+            weight_percentage,
+            position_index,
+        )
+    }
+
     pub fn challenge(ctx: Context<Challenge>, match_id: u64) -> Result<()> {
         instructions::challenge(ctx, match_id)
     }
