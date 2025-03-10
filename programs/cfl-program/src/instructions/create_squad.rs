@@ -39,6 +39,8 @@ pub fn create_squad(
         squad_index,
     ));
 
+    profile.set_inner(UserProfile::new(owner, profile.bump));
+
     profile.increment_squad_count();
 
     Ok(())
