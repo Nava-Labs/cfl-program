@@ -30,9 +30,9 @@ const PROFILE_SEED = "Profile";
 const MATCH_SEED = "Match";
 
 async function main() {
-  /// =================================================== \\\
+  // / =================================================== \\\
   // await initialize();
-  /// =================================================== \\\
+  // / =================================================== \\\
 
   // const squadIndex = 1;
 
@@ -76,8 +76,8 @@ async function main() {
 
   /// =================================================== \\\
 
-  const matchId = new BN(1);
-  const start = new BN(1741384656);
+  const matchId = new BN(3);
+  const start = new BN(1741615200);
   const duration = new BN(604800);
   const sol = new BN(0.01 * LAMPORTS_PER_SOL);
   const squadIndex = 1;
@@ -179,6 +179,11 @@ async function createMatch(
   matchType: any,
 ) {
   try {
+    let [profile] = PublicKey.findProgramAddressSync(
+      [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
+      program.programId,
+    );
+
     const [global] = PublicKey.findProgramAddressSync(
       [Buffer.from(GLOBAL_SEED)],
       program.programId,
@@ -205,6 +210,7 @@ async function createMatch(
         hostSquad,
         // @ts-ignore
         match,
+        userProfile: profile,
         global,
         user: keypairDeployer.publicKey,
       })

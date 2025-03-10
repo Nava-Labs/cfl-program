@@ -458,7 +458,7 @@ describe("cfl-program", () => {
   //   console.log("decoded match data", JSON.stringify(decodedDatas, null, 3));
   // });
 
-  it("Claim", async () => {
+  it("Claim Sol by winner", async () => {
     const id = new BN(1);
 
     let [match] = PublicKey.findProgramAddressSync(
@@ -476,7 +476,7 @@ describe("cfl-program", () => {
     );
 
     const ix = await program.methods
-      .claimSol(id)
+      .winnerClaimSol(id)
       .accounts({
         // @ts-ignore
         match_account: match,
