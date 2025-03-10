@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("3ajHeBXdbTVp57S9CXkATsktgSN5ngbcsa4dYGoM43UR");
+declare_id!("85Efd5eag2LjGYuVGMCmQYmdaVPnraDdJkiwWuUUiZA");
 
 pub mod errors;
 pub mod instructions;
@@ -21,14 +21,14 @@ pub mod cfl_program {
         ctx: Context<CreateSquad>,
         squad_index: u8,
         price_feed_ids: Vec<String>,
-        weight_percentage: Vec<f64>,
+        allocations: Vec<f64>,
         position_index: Vec<i8>,
     ) -> Result<()> {
         instructions::create_squad(
             ctx,
             squad_index,
             price_feed_ids,
-            weight_percentage,
+            allocations,
             position_index,
         )
     }
@@ -56,7 +56,7 @@ pub mod cfl_program {
         squad_index: u8,
         match_id: u64,
         price_feed_ids: Vec<String>,
-        weight_percentage: Vec<f64>,
+        allocations: Vec<f64>,
         position_index: Vec<i8>,
         start_timestamp: i64,
         duration: i64,
@@ -68,7 +68,7 @@ pub mod cfl_program {
             squad_index,
             match_id,
             price_feed_ids,
-            weight_percentage,
+            allocations,
             position_index,
             start_timestamp,
             duration,
@@ -82,7 +82,7 @@ pub mod cfl_program {
         squad_index: u8,
         match_id: u64,
         price_feed_ids: Vec<String>,
-        weight_percentage: Vec<f64>,
+        allocations: Vec<f64>,
         position_index: Vec<i8>,
     ) -> Result<()> {
         instructions::create_squad_and_challenge(
@@ -90,7 +90,7 @@ pub mod cfl_program {
             squad_index,
             match_id,
             price_feed_ids,
-            weight_percentage,
+            allocations,
             position_index,
         )
     }
@@ -103,7 +103,11 @@ pub mod cfl_program {
         instructions::finalize(ctx, match_id, winner)
     }
 
-    pub fn claim_sol(ctx: Context<ClaimSol>, match_id: u64) -> Result<()> {
-        instructions::claim_sol(ctx, match_id)
+    pub fn winner_claim_sol(ctx: Context<WinnerClaimSol>, match_id: u64) -> Result<()> {
+        instructions::winner_claim_sol(ctx, match_id)
+    }
+
+    pub fn host_claim_sol(ctx: Context<HostClaimSol>, match_id: u64) -> Result<()> {
+        instructions::host_claim_sol(ctx, match_id)
     }
 }

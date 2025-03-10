@@ -8,8 +8,8 @@ pub enum CustomError {
     #[msg("Invalid price feed length")]
     InvalidPriceFeedLength,
 
-    #[msg("Invalid weight percentage")]
-    InvalidWeightPercentageLength,
+    #[msg("Invalid allcoation length")]
+    InvalidAllocationLength,
 
     #[msg("Invalid position index length")]
     InvalidPositionIndexLength,
@@ -43,4 +43,7 @@ pub enum CustomError {
 
     #[msg("Same squad owner between Host and Challenger")]
     SameSquadOwner,
+
+    #[msg("Not Eligible")]
+    NotEligible,
 }

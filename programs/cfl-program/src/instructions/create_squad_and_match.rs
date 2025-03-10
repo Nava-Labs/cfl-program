@@ -8,7 +8,7 @@ pub fn create_squad_and_match(
     squad_index: u8,
     match_id: u64,
     price_feed_ids: Vec<String>,
-    weight_percentage: Vec<f64>,
+    allocations: Vec<f64>,
     position_index: Vec<i8>,
     start_timestamp: i64,
     duration: i64,
@@ -34,8 +34,8 @@ pub fn create_squad_and_match(
         return err!(CustomError::InvalidPriceFeedLength);
     }
 
-    if weight_percentage.len() != 10 {
-        return err!(CustomError::InvalidWeightPercentageLength);
+    if allocations.len() != 10 {
+        return err!(CustomError::InvalidAllocationLength);
     }
 
     if position_index.len() != 10 {
@@ -55,13 +55,14 @@ pub fn create_squad_and_match(
     squad.set_inner(Squad::new(
         owner,
         price_feed_ids,
-        weight_percentage,
+        allocations,
         position_index,
         squad.bump,
         squad_index,
     ));
 
     profile.increment_squad_count();
+    profile.add_total_sol_bet(sol_bet_amount_in_lamports);
 
     match_account.set_inner(Match::new(
         match_id,

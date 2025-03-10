@@ -3,22 +3,24 @@ use crate::state::*;
 
 use anchor_lang::prelude::*;
 
-pub fn claim_sol(ctx: Context<ClaimSol>, _match_id: u64) -> Result<()> {
+pub fn host_claim_sol(ctx: Context<HostClaimSol>, _match_id: u64) -> Result<()> {
     let match_account = &mut ctx.accounts.match_account;
     let user = &mut ctx.accounts.user;
+    let profile = &mut ctx.accounts.user_profile;
     let rent = &mut ctx.accounts.rent;
 
-    let squad_winner_account = &ctx.accounts.squad_winner;
-    let mut squad_winner_account_data: &[u8] = &squad_winner_account.data.borrow();
-    let squad_winner_data: Squad =
-        AccountDeserialize::try_deserialize(&mut squad_winner_account_data)?;
+    let host_squad_account = &ctx.accounts.host_squad;
+    let mut host_squad_account_data: &[u8] = &host_squad_account.data.borrow();
+    let host_squad_data: Squad = AccountDeserialize::try_deserialize(&mut host_squad_account_data)?;
 
-    if squad_winner_data.owner != user.key() {
+    if host_squad_data.owner != user.key() {
         return err!(CustomError::InvalidSquadOwner);
     }
 
-    if squad_winner_account.key() != match_account.winner {
-        return err!(CustomError::InvalidSquadWinner);
+    let now = Clock::get().unwrap().unix_timestamp;
+
+    if now < match_account.start_timestamp {
+        return err!(CustomError::NotEligible);
     }
 
     let account_rent = Rent::minimum_balance(rent, Match::ACCOUNT_SIZE);
@@ -28,12 +30,14 @@ pub fn claim_sol(ctx: Context<ClaimSol>, _match_id: u64) -> Result<()> {
     **match_account.to_account_info().try_borrow_mut_lamports()? -= sol_to_withdraw;
     **user.try_borrow_mut_lamports()? += sol_to_withdraw;
 
+    profile.add_total_sol_bet(sol_to_withdraw);
+
     Ok(())
 }
 
 #[derive(Accounts)]
 #[instruction(match_id: u64)]
-pub struct ClaimSol<'info> {
+pub struct HostClaimSol<'info> {
     #[account(
         mut,
         seeds = [Match::SEED.as_bytes(), match_id.to_le_bytes().as_ref()],
@@ -43,7 +47,14 @@ pub struct ClaimSol<'info> {
 
     /// CHECK:
     #[account(mut, owner =  crate::ID)]
-    pub squad_winner: AccountInfo<'info>,
+    pub host_squad: AccountInfo<'info>,
+
+    #[account(
+        mut,
+        seeds = [UserProfile::SEED.as_bytes(), user.key().as_ref()],
+        bump
+    )]
+    pub user_profile: Account<'info, UserProfile>,
 
     #[account(mut)]
     pub user: Signer<'info>,

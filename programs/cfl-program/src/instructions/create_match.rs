@@ -13,6 +13,7 @@ pub fn create_match(
 ) -> Result<()> {
     let match_account = &mut ctx.accounts.match_account;
     let user = &mut ctx.accounts.user;
+    let profile = &mut ctx.accounts.user_profile;
     let global = &mut ctx.accounts.global;
 
     let host_squad_account = &ctx.accounts.host_squad;
@@ -58,6 +59,8 @@ pub fn create_match(
 
     system_program::transfer(transfer_ctx, sol_bet_amount_in_lamports)?;
 
+    profile.add_total_sol_bet(sol_bet_amount_in_lamports);
+
     global.increment();
 
     Ok(())
@@ -78,6 +81,13 @@ pub struct CreateMatch<'info> {
         bump
     )]
     pub match_account: Account<'info, Match>,
+
+    #[account(
+        mut,
+        seeds = [UserProfile::SEED.as_bytes(), user.key().as_ref()],
+        bump
+    )]
+    pub user_profile: Account<'info, UserProfile>,
 
     #[account(
         mut,

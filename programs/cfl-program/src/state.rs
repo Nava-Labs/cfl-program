@@ -26,7 +26,7 @@ pub struct Squad {
     #[max_len(10, 66)]
     pub token_price_feed_ids: Vec<String>,
     #[max_len(10)]
-    pub token_weight: Vec<f64>,
+    pub allocations: Vec<f64>,
     #[max_len(10)]
     pub position_index: Vec<i8>,
     pub bump: u8,
@@ -41,7 +41,7 @@ impl Squad {
     pub fn new(
         owner: Pubkey,
         token_price_feed_ids: Vec<String>,
-        token_weight: Vec<f64>,
+        allocations: Vec<f64>,
         position_index: Vec<i8>,
         bump: u8,
         squad_index: u8,
@@ -49,7 +49,7 @@ impl Squad {
         Self {
             owner,
             token_price_feed_ids,
-            token_weight,
+            allocations,
             position_index,
             bump,
             squad_index,
@@ -60,16 +60,25 @@ impl Squad {
 #[account]
 pub struct UserProfile {
     pub squad_count: u8,
+    pub total_sol_bet: u64,
     pub bump: u8,
 }
 
 impl UserProfile {
     pub const SEED: &'static str = "Profile";
 
-    pub const ACCOUNT_SIZE: usize = 8 + 1 + 1;
+    pub const ACCOUNT_SIZE: usize = 8 + 1 + 8 + 1;
 
     pub fn increment_squad_count(&mut self) {
         self.squad_count += 1;
+    }
+
+    pub fn add_total_sol_bet(&mut self, sol_amount: u64) {
+        self.total_sol_bet += sol_amount;
+    }
+
+    pub fn remove_total_sol_bet(&mut self, sol_amount: u64) {
+        self.total_sol_bet -= sol_amount;
     }
 }
 

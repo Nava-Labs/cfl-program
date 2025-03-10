@@ -5,6 +5,7 @@ use anchor_lang::{prelude::*, system_program};
 
 pub fn challenge(ctx: Context<Challenge>, _match_id: u64) -> Result<()> {
     let user = &mut ctx.accounts.user;
+    let profile = &mut ctx.accounts.user_profile;
     let match_account = &mut ctx.accounts.match_account;
     let challenger_squad_account = &mut ctx.accounts.challenger_squad;
 
@@ -32,6 +33,8 @@ pub fn challenge(ctx: Context<Challenge>, _match_id: u64) -> Result<()> {
 
     match_account.challenge(challenger_squad_account.key(), user.key());
 
+    profile.add_total_sol_bet(match_account.sol_bet_amount);
+
     let transfer_ctx = CpiContext::new(
         ctx.accounts.system_program.to_account_info(),
         system_program::Transfer {
@@ -58,6 +61,12 @@ pub struct Challenge<'info> {
         bump
     )]
     pub match_account: Account<'info, Match>,
+
+    #[account(
+        seeds = [UserProfile::SEED.as_bytes(), user.key().as_ref()],
+        bump
+    )]
+    pub user_profile: Account<'info, UserProfile>,
 
     #[account(mut)]
     pub user: Signer<'info>,

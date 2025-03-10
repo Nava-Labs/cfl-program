@@ -7,7 +7,7 @@ pub fn create_squad(
     ctx: Context<CreateSquad>,
     squad_index: u8,
     price_feed_ids: Vec<String>,
-    weight_percentage: Vec<f64>,
+    allocations: Vec<f64>,
     position_index: Vec<i8>,
 ) -> Result<()> {
     let squad = &mut ctx.accounts.squad;
@@ -22,8 +22,8 @@ pub fn create_squad(
         return err!(CustomError::InvalidPriceFeedLength);
     }
 
-    if weight_percentage.len() != 10 {
-        return err!(CustomError::InvalidWeightPercentageLength);
+    if allocations.len() != 10 {
+        return err!(CustomError::InvalidAllocationLength);
     }
 
     if position_index.len() != 10 {
@@ -33,7 +33,7 @@ pub fn create_squad(
     squad.set_inner(Squad::new(
         owner,
         price_feed_ids,
-        weight_percentage,
+        allocations,
         position_index,
         squad.bump,
         squad_index,
