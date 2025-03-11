@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("HDDekN7QXHq3zbJttbY2EyYXrGmXXUn2ENwwktjAmGNJ");
+declare_id!("AFA8xd45E4BqpDoPgQqbGcKjbjTopJaBx1XWWMQCTFdz");
 
 pub mod errors;
 pub mod instructions;
@@ -38,32 +38,6 @@ pub mod cfl_program {
         instructions::create_match(
             ctx,
             match_id,
-            start_timestamp,
-            duration,
-            sol_bet_amount_in_lamports,
-            match_type,
-        )
-    }
-
-    pub fn create_squad_and_match(
-        ctx: Context<CreateSquadAndMatch>,
-        squad_index: u8,
-        match_id: u64,
-        price_feed_ids: Vec<String>,
-        allocations: [f64; 10],
-        formation: u64,
-        start_timestamp: u64,
-        duration: u64,
-        sol_bet_amount_in_lamports: u64,
-        match_type: u8,
-    ) -> Result<()> {
-        instructions::create_squad_and_match(
-            ctx,
-            squad_index,
-            match_id,
-            price_feed_ids,
-            allocations,
-            formation,
             start_timestamp,
             duration,
             sol_bet_amount_in_lamports,
