@@ -187,7 +187,7 @@ describe("cfl-program", () => {
       parseFloat("10"),
       parseFloat("10"),
       parseFloat("10"),
-      parseFloat("11"),
+      parseFloat("10"),
     ];
 
     const formation = new BN(433);
@@ -224,7 +224,7 @@ describe("cfl-program", () => {
       skipPreflight: false,
     });
 
-    console.log(await connection.getAccountInfo(squad));
+    console.log(await connection.simulateTransaction(tx));
 
     const profileState = await program.account.userProfile.fetch(profile);
     console.log("Profile State", JSON.stringify(profileState, null, 3));
@@ -429,7 +429,7 @@ describe("cfl-program", () => {
     );
 
     const ix = await program.methods
-      .finalize(id, winner)
+      .finalize(id, winner, 1, 2)
       .accounts({
         // @ts-ignore
         match,
