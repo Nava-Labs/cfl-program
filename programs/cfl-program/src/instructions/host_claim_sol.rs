@@ -17,6 +17,10 @@ pub fn host_claim_sol(ctx: Context<HostClaimSol>, _match_id: u64) -> Result<()> 
         return err!(CustomError::InvalidSquadOwner);
     }
 
+    if match_account.challenger_squad != Pubkey::default() {
+        return err!(CustomError::MatchStarted);
+    }
+
     let now = Clock::get().unwrap().unix_timestamp as u64;
 
     if now < match_account.start_timestamp {
@@ -30,7 +34,7 @@ pub fn host_claim_sol(ctx: Context<HostClaimSol>, _match_id: u64) -> Result<()> 
     **match_account.to_account_info().try_borrow_mut_lamports()? -= sol_to_withdraw;
     **user.try_borrow_mut_lamports()? += sol_to_withdraw;
 
-    profile.add_total_sol_bet(sol_to_withdraw);
+    profile.substract_total_sol_bet(sol_to_withdraw);
 
     Ok(())
 }

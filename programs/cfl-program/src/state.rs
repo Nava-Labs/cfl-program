@@ -58,7 +58,7 @@ impl Squad {
 
 #[account]
 pub struct UserProfile {
-    // pub user: Pubkey,
+    pub user: Pubkey,
     pub squad_count: u8,
     pub total_sol_bet: u64,
     pub bump: u8,
@@ -67,16 +67,16 @@ pub struct UserProfile {
 impl UserProfile {
     pub const SEED: &'static str = "Profile";
 
-    pub const ACCOUNT_SIZE: usize = 8 + 1 + 8 + 1;
+    pub const ACCOUNT_SIZE: usize = 8 + 32 + 1 + 8 + 1;
 
-    // pub fn new(user: Pubkey, bump: u8) -> Self {
-    //     Self {
-    //         user,
-    //         squad_count: 0,
-    //         total_sol_bet: 0,
-    //         bump,
-    //     }
-    // }
+    pub fn new(user: Pubkey, bump: u8) -> Self {
+        Self {
+            user,
+            squad_count: 0,
+            total_sol_bet: 0,
+            bump,
+        }
+    }
 
     pub fn increment_squad_count(&mut self) {
         self.squad_count += 1;
@@ -86,7 +86,7 @@ impl UserProfile {
         self.total_sol_bet += sol_amount;
     }
 
-    pub fn remove_total_sol_bet(&mut self, sol_amount: u64) {
+    pub fn substract_total_sol_bet(&mut self, sol_amount: u64) {
         self.total_sol_bet -= sol_amount;
     }
 }
