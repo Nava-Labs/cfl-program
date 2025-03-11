@@ -21,7 +21,7 @@ pub fn challenge(ctx: Context<Challenge>, _match_id: u64) -> Result<()> {
         return err!(CustomError::SameSquadOwner);
     }
 
-    let now = Clock::get().unwrap().unix_timestamp;
+    let now = Clock::get().unwrap().unix_timestamp as u64;
 
     if now > match_account.start_timestamp {
         return err!(CustomError::MatchExpired);

@@ -6,8 +6,8 @@ use anchor_lang::{prelude::*, system_program};
 pub fn create_match(
     ctx: Context<CreateMatch>,
     match_id: u64,
-    start_timestamp: i64,
-    duration: i64,
+    start_timestamp: u64,
+    duration: u64,
     sol_bet_amount_in_lamports: u64,
     match_type: u8,
 ) -> Result<()> {
@@ -28,7 +28,7 @@ pub fn create_match(
         return err!(CustomError::InvalidMatchId);
     }
 
-    let now = Clock::get().unwrap().unix_timestamp;
+    let now = Clock::get().unwrap().unix_timestamp as u64;
 
     if start_timestamp <= now {
         return err!(CustomError::InvalidTimestamp);

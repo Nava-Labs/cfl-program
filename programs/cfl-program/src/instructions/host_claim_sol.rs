@@ -17,7 +17,7 @@ pub fn host_claim_sol(ctx: Context<HostClaimSol>, _match_id: u64) -> Result<()> 
         return err!(CustomError::InvalidSquadOwner);
     }
 
-    let now = Clock::get().unwrap().unix_timestamp;
+    let now = Clock::get().unwrap().unix_timestamp as u64;
 
     if now < match_account.start_timestamp {
         return err!(CustomError::NotEligible);

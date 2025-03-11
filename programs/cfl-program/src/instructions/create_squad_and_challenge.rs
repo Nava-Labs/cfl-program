@@ -8,8 +8,8 @@ pub fn create_squad_and_challenge(
     squad_index: u8,
     _match_id: u64,
     price_feed_ids: Vec<String>,
-    allocations: Vec<f64>,
-    position_index: Vec<i8>,
+    allocations: [f64; 10],
+    formation: u64,
 ) -> Result<()> {
     let squad = &mut ctx.accounts.squad;
     let profile = &mut ctx.accounts.user_profile;
@@ -29,15 +29,11 @@ pub fn create_squad_and_challenge(
         return err!(CustomError::InvalidAllocationLength);
     }
 
-    if position_index.len() != 10 {
-        return err!(CustomError::InvalidPositionIndexLength);
-    }
-
     if owner == match_account.host_squad_owner {
         return err!(CustomError::SameSquadOwner);
     }
 
-    let now = Clock::get().unwrap().unix_timestamp;
+    let now = Clock::get().unwrap().unix_timestamp as u64;
 
     if now > match_account.start_timestamp {
         return err!(CustomError::MatchExpired);
@@ -51,9 +47,9 @@ pub fn create_squad_and_challenge(
         owner,
         price_feed_ids,
         allocations,
-        position_index,
         squad.bump,
         squad_index,
+        formation,
     ));
 
     profile.increment_squad_count();

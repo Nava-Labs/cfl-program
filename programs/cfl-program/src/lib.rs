@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("EJVRwfiTuahYBgaxXXCj1DRcYFKF7mQJt15Ax2Jjmzhf");
+declare_id!("HDDekN7QXHq3zbJttbY2EyYXrGmXXUn2ENwwktjAmGNJ");
 
 pub mod errors;
 pub mod instructions;
@@ -21,23 +21,17 @@ pub mod cfl_program {
         ctx: Context<CreateSquad>,
         squad_index: u8,
         price_feed_ids: Vec<String>,
-        allocations: Vec<f64>,
-        position_index: Vec<i8>,
+        allocations: [f64; 10],
+        formation: u64,
     ) -> Result<()> {
-        instructions::create_squad(
-            ctx,
-            squad_index,
-            price_feed_ids,
-            allocations,
-            position_index,
-        )
+        instructions::create_squad(ctx, squad_index, price_feed_ids, allocations, formation)
     }
 
     pub fn create_match(
         ctx: Context<CreateMatch>,
         match_id: u64,
-        start_timestamp: i64,
-        duration: i64,
+        start_timestamp: u64,
+        duration: u64,
         sol_bet_amount_in_lamports: u64,
         match_type: u8,
     ) -> Result<()> {
@@ -56,10 +50,10 @@ pub mod cfl_program {
         squad_index: u8,
         match_id: u64,
         price_feed_ids: Vec<String>,
-        allocations: Vec<f64>,
-        position_index: Vec<i8>,
-        start_timestamp: i64,
-        duration: i64,
+        allocations: [f64; 10],
+        formation: u64,
+        start_timestamp: u64,
+        duration: u64,
         sol_bet_amount_in_lamports: u64,
         match_type: u8,
     ) -> Result<()> {
@@ -69,7 +63,7 @@ pub mod cfl_program {
             match_id,
             price_feed_ids,
             allocations,
-            position_index,
+            formation,
             start_timestamp,
             duration,
             sol_bet_amount_in_lamports,
@@ -82,8 +76,8 @@ pub mod cfl_program {
         squad_index: u8,
         match_id: u64,
         price_feed_ids: Vec<String>,
-        allocations: Vec<f64>,
-        position_index: Vec<i8>,
+        allocations: [f64; 10],
+        formation: u64,
     ) -> Result<()> {
         instructions::create_squad_and_challenge(
             ctx,
@@ -91,7 +85,7 @@ pub mod cfl_program {
             match_id,
             price_feed_ids,
             allocations,
-            position_index,
+            formation,
         )
     }
 

@@ -8,10 +8,10 @@ pub fn create_squad_and_match(
     squad_index: u8,
     match_id: u64,
     price_feed_ids: Vec<String>,
-    allocations: Vec<f64>,
-    position_index: Vec<i8>,
-    start_timestamp: i64,
-    duration: i64,
+    allocations: [f64; 10],
+    formation: u64,
+    start_timestamp: u64,
+    duration: u64,
     sol_bet_amount_in_lamports: u64,
     match_type: u8,
 ) -> Result<()> {
@@ -38,11 +38,7 @@ pub fn create_squad_and_match(
         return err!(CustomError::InvalidAllocationLength);
     }
 
-    if position_index.len() != 10 {
-        return err!(CustomError::InvalidPositionIndexLength);
-    }
-
-    let now = Clock::get().unwrap().unix_timestamp;
+    let now = Clock::get().unwrap().unix_timestamp as u64;
 
     if start_timestamp <= now {
         return err!(CustomError::InvalidTimestamp);
@@ -56,9 +52,9 @@ pub fn create_squad_and_match(
         owner,
         price_feed_ids,
         allocations,
-        position_index,
         squad.bump,
         squad_index,
+        formation,
     ));
 
     profile.increment_squad_count();

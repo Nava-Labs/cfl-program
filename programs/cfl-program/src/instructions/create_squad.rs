@@ -7,8 +7,8 @@ pub fn create_squad(
     ctx: Context<CreateSquad>,
     squad_index: u8,
     price_feed_ids: Vec<String>,
-    allocations: Vec<f64>,
-    position_index: Vec<i8>,
+    allocations: [f64; 10],
+    formation: u64,
 ) -> Result<()> {
     let squad = &mut ctx.accounts.squad;
     let profile = &mut ctx.accounts.user_profile;
@@ -26,20 +26,16 @@ pub fn create_squad(
         return err!(CustomError::InvalidAllocationLength);
     }
 
-    if position_index.len() != 10 {
-        return err!(CustomError::InvalidPositionIndexLength);
-    }
-
     squad.set_inner(Squad::new(
         owner,
         price_feed_ids,
         allocations,
-        position_index,
         squad.bump,
         squad_index,
+        formation,
     ));
 
-    profile.set_inner(UserProfile::new(owner, profile.bump));
+    // profile.set_inner(UserProfile::new(owner, profile.bump));
 
     profile.increment_squad_count();
 

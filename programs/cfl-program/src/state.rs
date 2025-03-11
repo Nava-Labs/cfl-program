@@ -26,11 +26,10 @@ pub struct Squad {
     #[max_len(10, 66)]
     pub token_price_feed_ids: Vec<String>,
     #[max_len(10)]
-    pub allocations: Vec<f64>,
-    #[max_len(10)]
-    pub position_index: Vec<i8>,
+    pub allocations: [f64; 10],
     pub bump: u8,
     pub squad_index: u8,
+    pub formation: u64,
 }
 
 impl Squad {
@@ -41,25 +40,25 @@ impl Squad {
     pub fn new(
         owner: Pubkey,
         token_price_feed_ids: Vec<String>,
-        allocations: Vec<f64>,
-        position_index: Vec<i8>,
+        allocations: [f64; 10],
         bump: u8,
         squad_index: u8,
+        formation: u64,
     ) -> Self {
         Self {
             owner,
             token_price_feed_ids,
             allocations,
-            position_index,
             bump,
             squad_index,
+            formation,
         }
     }
 }
 
 #[account]
 pub struct UserProfile {
-    pub user: Pubkey,
+    // pub user: Pubkey,
     pub squad_count: u8,
     pub total_sol_bet: u64,
     pub bump: u8,
@@ -68,16 +67,16 @@ pub struct UserProfile {
 impl UserProfile {
     pub const SEED: &'static str = "Profile";
 
-    pub const ACCOUNT_SIZE: usize = 8 + 32 + 1 + 8 + 1;
+    pub const ACCOUNT_SIZE: usize = 8 + 1 + 8 + 1;
 
-    pub fn new(user: Pubkey, bump: u8) -> Self {
-        Self {
-            user,
-            squad_count: 0,
-            total_sol_bet: 0,
-            bump,
-        }
-    }
+    // pub fn new(user: Pubkey, bump: u8) -> Self {
+    //     Self {
+    //         user,
+    //         squad_count: 0,
+    //         total_sol_bet: 0,
+    //         bump,
+    //     }
+    // }
 
     pub fn increment_squad_count(&mut self) {
         self.squad_count += 1;
@@ -100,9 +99,9 @@ pub struct Match {
     pub host_squad_owner: Pubkey,
     pub challenger_squad_owner: Pubkey,
     pub sol_bet_amount: u64,
-    pub duration: i64,
-    pub start_timestamp: i64,
-    pub end_timestamp: i64,
+    pub duration: u64,
+    pub start_timestamp: u64,
+    pub end_timestamp: u64,
     pub is_finished: bool,
     pub winner: Pubkey,
     pub bump: u8,
@@ -119,8 +118,8 @@ impl Match {
         host_squad: Pubkey,
         host_squad_owner: Pubkey,
         sol_bet_amount: u64,
-        duration: i64,
-        start_timestamp: i64,
+        duration: u64,
+        start_timestamp: u64,
         bump: u8,
         match_type: u8,
     ) -> Self {
