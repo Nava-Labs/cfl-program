@@ -3,10 +3,16 @@ use std::str::FromStr;
 
 use anchor_lang::prelude::*;
 
-pub fn finalize(ctx: Context<Finalize>, _match_id: u64, winner: Pubkey) -> Result<()> {
+pub fn finalize(
+    ctx: Context<Finalize>,
+    _match_id: u64,
+    winner: Pubkey,
+    host_squad_mc_end: f64,
+    challenger_squad_mc_end: f64,
+) -> Result<()> {
     let match_account = &mut ctx.accounts.match_account;
 
-    match_account.finalize(winner);
+    match_account.finalize(winner, host_squad_mc_end, challenger_squad_mc_end);
 
     Ok(())
 }

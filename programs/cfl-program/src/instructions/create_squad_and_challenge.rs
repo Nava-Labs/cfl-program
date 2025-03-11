@@ -56,14 +56,15 @@ pub fn create_squad_and_challenge(
 
     squad.set_inner(Squad::new(
         owner,
+        squad_index,
         price_feed_ids,
         allocations,
-        squad.bump,
-        squad_index,
         formation,
+        ctx.bumps.squad,
     ));
 
-    profile.set_inner(UserProfile::new(owner, profile.bump));
+    // direct update the profile state
+    profile.user = owner;
 
     profile.increment_squad_count();
 

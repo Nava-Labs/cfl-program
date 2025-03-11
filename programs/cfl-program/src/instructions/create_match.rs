@@ -40,13 +40,13 @@ pub fn create_match(
 
     match_account.set_inner(Match::new(
         match_id,
+        match_type,
         host_squad_account.key(),
         user.key(),
         sol_bet_amount_in_lamports,
         duration,
         start_timestamp,
-        match_account.bump,
-        match_type,
+        ctx.bumps.match_account,
     ));
 
     let transfer_ctx = CpiContext::new(

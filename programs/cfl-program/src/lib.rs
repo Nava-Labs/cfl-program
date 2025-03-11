@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("AFA8xd45E4BqpDoPgQqbGcKjbjTopJaBx1XWWMQCTFdz");
+declare_id!("7wHZscUp9Zn1uoupNChJybhgU6iDhZ8dof3Phe45n9zU");
 
 pub mod errors;
 pub mod instructions;
@@ -67,8 +67,20 @@ pub mod cfl_program {
         instructions::challenge(ctx, match_id)
     }
 
-    pub fn finalize(ctx: Context<Finalize>, match_id: u64, winner: Pubkey) -> Result<()> {
-        instructions::finalize(ctx, match_id, winner)
+    pub fn finalize(
+        ctx: Context<Finalize>,
+        match_id: u64,
+        winner: Pubkey,
+        host_squad_mc_end: f64,
+        challenger_squad_mc_end: f64,
+    ) -> Result<()> {
+        instructions::finalize(
+            ctx,
+            match_id,
+            winner,
+            host_squad_mc_end,
+            challenger_squad_mc_end,
+        )
     }
 
     pub fn winner_claim_sol(ctx: Context<WinnerClaimSol>, match_id: u64) -> Result<()> {

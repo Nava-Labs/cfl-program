@@ -23,13 +23,13 @@ impl Global {
 #[derive(InitSpace)]
 pub struct Squad {
     pub owner: Pubkey,
+    pub squad_index: u8,
     #[max_len(10, 66)]
     pub token_price_feed_ids: Vec<String>,
     #[max_len(10)]
     pub allocations: [f64; 10],
-    pub bump: u8,
-    pub squad_index: u8,
     pub formation: u64,
+    pub bump: u8,
 }
 
 impl Squad {
@@ -39,11 +39,11 @@ impl Squad {
 
     pub fn new(
         owner: Pubkey,
+        squad_index: u8,
         token_price_feed_ids: Vec<String>,
         allocations: [f64; 10],
-        bump: u8,
-        squad_index: u8,
         formation: u64,
+        bump: u8,
     ) -> Self {
         Self {
             owner,
@@ -61,22 +61,12 @@ pub struct UserProfile {
     pub user: Pubkey,
     pub squad_count: u8,
     pub total_sol_bet: u64,
-    pub bump: u8,
 }
 
 impl UserProfile {
     pub const SEED: &'static str = "Profile";
 
-    pub const ACCOUNT_SIZE: usize = 8 + 32 + 1 + 8 + 1;
-
-    pub fn new(user: Pubkey, bump: u8) -> Self {
-        Self {
-            user,
-            squad_count: 0,
-            total_sol_bet: 0,
-            bump,
-        }
-    }
+    pub const ACCOUNT_SIZE: usize = 8 + 32 + 1 + 8;
 
     pub fn increment_squad_count(&mut self) {
         self.squad_count += 1;
@@ -94,6 +84,7 @@ impl UserProfile {
 #[account]
 pub struct Match {
     pub match_id: u64,
+    pub match_type: u8,
     pub host_squad: Pubkey,
     pub challenger_squad: Pubkey,
     pub host_squad_owner: Pubkey,
@@ -104,27 +95,29 @@ pub struct Match {
     pub end_timestamp: u64,
     pub is_finished: bool,
     pub winner: Pubkey,
+    pub host_squad_mc_end: f64,
+    pub challenger_squad_mc_end: f64,
     pub bump: u8,
-    pub match_type: u8,
 }
 
 impl Match {
     pub const SEED: &'static str = "Match";
 
-    pub const ACCOUNT_SIZE: usize = 8 + 8 + 32 + 32 + 32 + 32 + 8 + 8 + 8 + 8 + 1 + 32 + 1 + 1;
+    pub const ACCOUNT_SIZE: usize = 8 + 8 + 1 + (4 * 32) + (4 * 8) + 1 + 32 + (2 * 8) + 1;
 
     pub fn new(
         match_id: u64,
+        match_type: u8,
         host_squad: Pubkey,
         host_squad_owner: Pubkey,
         sol_bet_amount: u64,
         duration: u64,
         start_timestamp: u64,
         bump: u8,
-        match_type: u8,
     ) -> Self {
         Self {
             match_id,
+            match_type,
             host_squad,
             challenger_squad: Pubkey::default(),
             host_squad_owner,
@@ -135,8 +128,9 @@ impl Match {
             end_timestamp: start_timestamp + duration,
             is_finished: false,
             winner: Pubkey::default(),
+            host_squad_mc_end: 0.0,
+            challenger_squad_mc_end: 0.0,
             bump,
-            match_type,
         }
     }
 
@@ -145,8 +139,15 @@ impl Match {
         self.challenger_squad_owner = challenger_squad_owner;
     }
 
-    pub fn finalize(&mut self, winner: Pubkey) {
+    pub fn finalize(
+        &mut self,
+        winner: Pubkey,
+        host_squad_mc_end: f64,
+        challenger_squad_mc_end: f64,
+    ) {
         self.is_finished = true;
         self.winner = winner;
+        self.host_squad_mc_end = host_squad_mc_end;
+        self.challenger_squad_mc_end = challenger_squad_mc_end;
     }
 }
