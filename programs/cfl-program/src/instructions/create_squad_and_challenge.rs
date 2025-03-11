@@ -29,6 +29,17 @@ pub fn create_squad_and_challenge(
         return err!(CustomError::InvalidAllocationLength);
     }
 
+    for allocation in allocations.iter() {
+        if *allocation == 0.0 {
+            return err!(CustomError::InvalidAllocationValue);
+        }
+    }
+
+    let total_allocation: f64 = allocations.iter().sum();
+    if total_allocation < 99.0 || total_allocation > 100.0 {
+        return err!(CustomError::InvalidAllocationValue);
+    }
+
     if owner == match_account.host_squad_owner {
         return err!(CustomError::SameSquadOwner);
     }
@@ -51,6 +62,8 @@ pub fn create_squad_and_challenge(
         squad_index,
         formation,
     ));
+
+    profile.set_inner(UserProfile::new(owner, profile.bump));
 
     profile.increment_squad_count();
 

@@ -11,6 +11,9 @@ pub enum CustomError {
     #[msg("Invalid allcoation length")]
     InvalidAllocationLength,
 
+    #[msg("Invalid allcoation value")]
+    InvalidAllocationValue,
+
     #[msg("Invalid position index length")]
     InvalidPositionIndexLength,
 
