@@ -24,14 +24,68 @@ const secretKeyDeployer = Uint8Array.from(
 );
 const keypairDeployer = Keypair.fromSecretKey(secretKeyDeployer);
 
+const secretKeyAkram = Uint8Array.from(require("../environment/ashar.json"));
+const keypairAkram = Keypair.fromSecretKey(secretKeyAkram);
+
 const GLOBAL_SEED = "Global";
 const SQUAD_SEED = "Squad";
 const PROFILE_SEED = "Profile";
 const MATCH_SEED = "Match";
 
 async function main() {
-  // const squadIndex = 2;
-  // const matchId = 4;
+  // const squadIndex = 1;
+  // const matchId = 2;
+  // const pf1 =
+  //   "0x0fc54579a29ba60a08fdb5c28348f22fd3bec18e221dd6b90369950db638a5a7";
+  // const pf2 =
+  //   "0x45b75908a1965a86080a26d9f31ab69d045d4dda73d1394e0d3693ce00d40e6f";
+  // const pf3 =
+  //   "0xa80e97f70f6a4a8a0273822fb86d51b2bdb9a16ce0edb7ea8c8b84cbaecb5ce5";
+  // const pf4 =
+  //   "0x7358313661dcd4f842a1423aa4f7a05f009001c9113201c719621d3f1aa80a73";
+  // const pf5 =
+  //   "0x58cd29ef0e714c5affc44f269b2c1899a52da4169d7acc147b9da692e6953608";
+  // const pf6 =
+  //   "0x3c987d95da67ceb12705b22448200568c15b6242796cacc21c11f622e74cfffb";
+  // const pf7 =
+  //   "0xd6f83dfeaff95d596ddec26af2ee32f391c206a183b161b7980821860eeef2f5";
+  // const pf8 =
+  //   "0x9b5729efe3d68e537cdcb2ca70444dea5f06e1660b562632609757076d0b9448";
+  // const pf9 =
+  //   "0x514aed52ca5294177f20187ae883cec4a018619772ddce41efcc36a6448f5d5d";
+  // const pf10 =
+  //   "0x1a483c4a63876d286991ac0d6e090298db42e88c3826b6e0cff89daca498eed5";
+  // const pfs = [pf1, pf2, pf3, pf4, pf5, pf6, pf7, pf8, pf9, pf10];
+  // const allocations = [
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  // ];
+  // const start = new BN(1741618800);
+  // const duration = new BN(604800);
+  // const sol = new BN(0.01 * LAMPORTS_PER_SOL);
+  // const matchType = 0;
+  // await createSquadAndMatch(
+  //   squadIndex,
+  //   matchId,
+  //   pfs,
+  //   allocations,
+  //   start,
+  //   duration,
+  //   sol,
+  //   matchType,
+  // );
+
+  /// =================================================== \\\
+  // const squadIndex = 3;
+  // const matchId = 1;
   // const pf1 =
   //   "0x0fc54579a29ba60a08fdb5c28348f22fd3bec18e221dd6b90369950db638a5a7";
   // const pf2 =
@@ -66,75 +120,16 @@ async function main() {
   //   parseFloat("10"),
   // ];
   // const positionIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  // const start = new BN(1741615200);
-  // const duration = new BN(604800);
-  // const sol = new BN(0.01 * LAMPORTS_PER_SOL);
-  // const matchType = 0;
-
-  // await createSquadAndMatch(
+  // await createSquadAndChallenge(
   //   squadIndex,
   //   matchId,
   //   pfs,
   //   allocations,
   //   positionIndex,
-  //   start,
-  //   duration,
-  //   sol,
-  //   matchType,
   // );
-  //
-  //
-
-  /// =================================================== \\\
-
-  const squadIndex = 3;
-  const matchId = 1;
-  const pf1 =
-    "0x0fc54579a29ba60a08fdb5c28348f22fd3bec18e221dd6b90369950db638a5a7";
-  const pf2 =
-    "0x45b75908a1965a86080a26d9f31ab69d045d4dda73d1394e0d3693ce00d40e6f";
-  const pf3 =
-    "0xa80e97f70f6a4a8a0273822fb86d51b2bdb9a16ce0edb7ea8c8b84cbaecb5ce5";
-  const pf4 =
-    "0x7358313661dcd4f842a1423aa4f7a05f009001c9113201c719621d3f1aa80a73";
-  const pf5 =
-    "0x58cd29ef0e714c5affc44f269b2c1899a52da4169d7acc147b9da692e6953608";
-  const pf6 =
-    "0x3c987d95da67ceb12705b22448200568c15b6242796cacc21c11f622e74cfffb";
-  const pf7 =
-    "0xd6f83dfeaff95d596ddec26af2ee32f391c206a183b161b7980821860eeef2f5";
-  const pf8 =
-    "0x9b5729efe3d68e537cdcb2ca70444dea5f06e1660b562632609757076d0b9448";
-  const pf9 =
-    "0x514aed52ca5294177f20187ae883cec4a018619772ddce41efcc36a6448f5d5d";
-  const pf10 =
-    "0x1a483c4a63876d286991ac0d6e090298db42e88c3826b6e0cff89daca498eed5";
-  const pfs = [pf1, pf2, pf3, pf4, pf5, pf6, pf7, pf8, pf9, pf10];
-  const allocations = [
-    parseFloat("10"),
-    parseFloat("10"),
-    parseFloat("10"),
-    parseFloat("10"),
-    parseFloat("10"),
-    parseFloat("10"),
-    parseFloat("10"),
-    parseFloat("10"),
-    parseFloat("10"),
-    parseFloat("10"),
-  ];
-  const positionIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-  await createSquadAndChallenge(
-    squadIndex,
-    matchId,
-    pfs,
-    allocations,
-    positionIndex,
-  );
-
   /// =================================================== \\\
   // const matchId = new BN(3);
-  // const start = new BN(1741615200);
+  // const start = new BN(1741618800);
   // const duration = new BN(604800);
   // const sol = new BN(0.01 * LAMPORTS_PER_SOL);
   // const squadIndex = 1;
@@ -145,8 +140,8 @@ async function main() {
   // / =================================================== \\\
   // / =================================================== \\\
   // / =================================================== \\\
-
   // await initialize();
+
   // / =================================================== \\\
   // const squadIndex = 1;
   // const pf1 =
@@ -182,17 +177,19 @@ async function main() {
   //   parseFloat("10"),
   //   parseFloat("10"),
   // ];
-  // const positionIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  // await createSquad(pfs, percentages, positionIndex, squadIndex);
+  // const formation = 433;
+  // await createSquad(pfs, percentages, squadIndex, formation);
+
   /// =================================================== \\\
-  // const matchId = new BN(3);
-  // const start = new BN(1741615200);
-  // const duration = new BN(604800);
-  // const sol = new BN(0.01 * LAMPORTS_PER_SOL);
-  // const squadIndex = 1;
-  // const matchType = 0;
-  // await createMatch(matchId, start, duration, sol, squadIndex, matchType);
+  const matchId = new BN(10);
+  const start = new BN(1741723200);
+  const duration = new BN(3600);
+  const sol = new BN(0.08 * LAMPORTS_PER_SOL);
+  const squadIndex = 1;
+  const matchType = 0;
+  await createMatch(matchId, start, duration, sol, squadIndex, matchType);
   // / =================================================== \\\
+
   // const matchId = new BN(0);
   // const challengerSquadIndex = 0;
   // await challenge(matchId, challengerSquadIndex);
@@ -245,11 +242,11 @@ async function createSquadAndMatch(
   matchId: number,
   pfs: string[],
   allocations: number[],
-  positionIndex: number[],
   start: any,
   duration: any,
   solBetAmount: any,
   matchType: number,
+  formation: number,
 ) {
   try {
     const [global] = PublicKey.findProgramAddressSync(
@@ -258,14 +255,14 @@ async function createSquadAndMatch(
     );
 
     let [profile] = PublicKey.findProgramAddressSync(
-      [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
+      [Buffer.from(PROFILE_SEED), keypairAkram.publicKey.toBuffer()],
       program.programId,
     );
 
     let [squad] = PublicKey.findProgramAddressSync(
       [
         Buffer.from(SQUAD_SEED),
-        keypairDeployer.publicKey.toBuffer(),
+        keypairAkram.publicKey.toBuffer(),
         Buffer.from(new Uint8Array([squadIndex])),
       ],
       program.programId,
@@ -282,7 +279,7 @@ async function createSquadAndMatch(
         new BN(matchId),
         pfs,
         allocations,
-        positionIndex,
+        new BN(formation),
         start,
         duration,
         solBetAmount,
@@ -294,9 +291,9 @@ async function createSquadAndMatch(
         userProfile: profile,
         matchAccount: match,
         global,
-        user: keypairDeployer.publicKey,
+        user: keypairAkram.publicKey,
       })
-      .signers([keypairDeployer])
+      .signers([keypairAkram])
       .rpc();
 
     console.log("Transaction signature", tx);
@@ -310,7 +307,7 @@ async function createSquadAndChallenge(
   matchId: number,
   pfs: string[],
   allocations: number[],
-  positionIndex: number[],
+  formation: number,
 ) {
   try {
     let [profile] = PublicKey.findProgramAddressSync(
@@ -338,7 +335,7 @@ async function createSquadAndChallenge(
         new BN(matchId),
         pfs,
         allocations,
-        positionIndex,
+        new BN(formation),
       )
       .accounts({
         // @ts-ignore
@@ -359,33 +356,33 @@ async function createSquadAndChallenge(
 async function createSquad(
   pfs: string[],
   percentage: number[],
-  positionIndex: number[],
   squadIndex: number,
+  formation: number,
 ) {
   try {
     let [profile] = PublicKey.findProgramAddressSync(
-      [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
+      [Buffer.from(PROFILE_SEED), keypairAkram.publicKey.toBuffer()],
       program.programId,
     );
 
     let [squad] = PublicKey.findProgramAddressSync(
       [
         Buffer.from(SQUAD_SEED),
-        keypairDeployer.publicKey.toBuffer(),
+        keypairAkram.publicKey.toBuffer(),
         Buffer.from(new Uint8Array([squadIndex])),
       ],
       program.programId,
     );
 
     const tx = await program.methods
-      .createSquad(squadIndex, pfs, percentage, positionIndex)
+      .createSquad(squadIndex, pfs, percentage, new BN(formation))
       .accounts({
         // @ts-ignore
         squad,
         userProfile: profile,
-        user: keypairDeployer.publicKey,
+        user: keypairAkram.publicKey,
       })
-      .signers([keypairDeployer])
+      .signers([keypairAkram])
       .rpc();
 
     console.log("Transaction signature", tx);
@@ -404,7 +401,7 @@ async function createMatch(
 ) {
   try {
     let [profile] = PublicKey.findProgramAddressSync(
-      [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
+      [Buffer.from(PROFILE_SEED), keypairAkram.publicKey.toBuffer()],
       program.programId,
     );
 
@@ -416,7 +413,7 @@ async function createMatch(
     let [hostSquad] = PublicKey.findProgramAddressSync(
       [
         Buffer.from(SQUAD_SEED),
-        keypairDeployer.publicKey.toBuffer(),
+        keypairAkram.publicKey.toBuffer(),
         Buffer.from(new Uint8Array([squadIndex])),
       ],
       program.programId,
@@ -436,9 +433,9 @@ async function createMatch(
         match,
         userProfile: profile,
         global,
-        user: keypairDeployer.publicKey,
+        user: keypairAkram.publicKey,
       })
-      .signers([keypairDeployer])
+      .signers([keypairAkram])
       .rpc();
 
     console.log("Transaction signature", tx);

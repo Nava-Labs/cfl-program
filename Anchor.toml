@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-cfl_program = "EJVRwfiTuahYBgaxXXCj1DRcYFKF7mQJt15Ax2Jjmzhf"
+cfl_program = "HDDekN7QXHq3zbJttbY2EyYXrGmXXUn2ENwwktjAmGNJ"
 
 [registry]
 url = "https://api.apr.dev"
@@ -13,8 +13,6 @@ url = "https://api.apr.dev"
 [provider]
 # cluster = "https://rpc.mainnet-alpha.sonic.game"
 # cluster = "https://api.testnet.sonic.game/"
-# cluster = "Devnet"
-# cluster = "http://127.0.0.1:8899"
 cluster = "Localnet"
 wallet = "./environment/deployer.json"
 

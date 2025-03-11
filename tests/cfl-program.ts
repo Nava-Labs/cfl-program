@@ -113,8 +113,6 @@ describe("cfl-program", () => {
       parseFloat("100"),
     ];
 
-    const positionIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-
     let [profile] = PublicKey.findProgramAddressSync(
       [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
       program.programId,
@@ -131,7 +129,7 @@ describe("cfl-program", () => {
     console.log("Squad pda", squad.toBase58());
 
     const ix = await program.methods
-      .createSquad(1, pfs, percentages, positionIndex)
+      .createSquad(1, pfs, percentages)
       .accounts({
         // @ts-ignore
         squad,
@@ -147,11 +145,11 @@ describe("cfl-program", () => {
       skipPreflight: false,
     });
 
-    const profileState = await program.account.userProfile.fetch(profile);
-    console.log("Profile State", JSON.stringify(profileState, null, 3));
+    // const profileState = await program.account.userProfile.fetch(profile);
+    // console.log("Profile State", JSON.stringify(profileState, null, 3));
 
-    const squadState = await program.account.squad.fetch(squad);
-    console.log("Squad State", JSON.stringify(squadState, null, 3));
+    // const squadState = await program.account.squad.fetch(squad);
+    // console.log("Squad State", JSON.stringify(squadState, null, 3));
   });
 
   it("Squad Created! by User", async () => {
@@ -190,8 +188,6 @@ describe("cfl-program", () => {
       parseFloat("100"),
     ];
 
-    const positionIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-
     let [profile] = PublicKey.findProgramAddressSync(
       [Buffer.from(PROFILE_SEED), keypairUser.publicKey.toBuffer()],
       program.programId,
@@ -208,7 +204,7 @@ describe("cfl-program", () => {
     console.log("Squad pda", squad.toBase58());
 
     const ix = await program.methods
-      .createSquad(1, pfs, percentages, positionIndex)
+      .createSquad(1, pfs, percentages)
       .accounts({
         // @ts-ignore
         squad,
@@ -223,6 +219,8 @@ describe("cfl-program", () => {
     await sendAndConfirmTransaction(connection, tx, [keypairUser], {
       skipPreflight: false,
     });
+
+    console.log(await connection.getAccountInfo(squad));
 
     const profileState = await program.account.userProfile.fetch(profile);
     console.log("Profile State", JSON.stringify(profileState, null, 3));
@@ -551,8 +549,6 @@ describe("cfl-program", () => {
       parseFloat("100"),
     ];
 
-    const positionIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-
     let [profile] = PublicKey.findProgramAddressSync(
       [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
       program.programId,
@@ -592,7 +588,6 @@ describe("cfl-program", () => {
         matchId,
         pfs,
         percentages,
-        positionIndex,
         start,
         duration,
         sol,
@@ -653,8 +648,6 @@ describe("cfl-program", () => {
       parseFloat("100"),
     ];
 
-    const positionIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-
     let [profile] = PublicKey.findProgramAddressSync(
       [Buffer.from(PROFILE_SEED), keypairUser.publicKey.toBuffer()],
       program.programId,
@@ -679,13 +672,7 @@ describe("cfl-program", () => {
     );
 
     const ix = await program.methods
-      .createSquadAndChallenge(
-        squadIndex,
-        matchId,
-        pfs,
-        percentages,
-        positionIndex,
-      )
+      .createSquadAndChallenge(squadIndex, matchId, pfs, percentages)
       .accounts({
         // @ts-ignore
         squad,
