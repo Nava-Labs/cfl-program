@@ -45,24 +45,6 @@ pub mod cfl_program {
         )
     }
 
-    pub fn create_squad_and_challenge(
-        ctx: Context<CreateSquadAndChallenge>,
-        squad_index: u8,
-        match_id: u64,
-        price_feed_ids: Vec<String>,
-        allocations: [f64; 10],
-        formation: u64,
-    ) -> Result<()> {
-        instructions::create_squad_and_challenge(
-            ctx,
-            squad_index,
-            match_id,
-            price_feed_ids,
-            allocations,
-            formation,
-        )
-    }
-
     pub fn challenge(ctx: Context<Challenge>, match_id: u64) -> Result<()> {
         instructions::challenge(ctx, match_id)
     }

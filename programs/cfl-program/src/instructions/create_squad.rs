@@ -58,8 +58,8 @@ pub fn create_squad(
         .owner(Some(&user.to_account_info()))
         .update_authority(Some(&squad.to_account_info()))
         .system_program(&ctx.accounts.system_program.to_account_info())
-        .name("SMB Squad".to_string())
-        .uri("https://yocfk4zxk3bsrfslznlyan5hfrbpxccq3w5ynywzqvtbwjbi7xiq.arweave.net/w4RVczdWwyiWS8tXgDenLEL7iFDdu4bi2YVmGyQo_dE/151.json".to_string())
+        .name("CFL Squad".to_string())
+        .uri("https://qjajjywjjuxozhqgpwdm.supabase.co/storage/v1/object/public/metadata//metadata.json".to_string())
         .invoke_signed(&[&[
             Squad::SEED.as_bytes(),
             user.key().as_ref(),
