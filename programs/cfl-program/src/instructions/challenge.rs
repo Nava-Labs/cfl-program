@@ -63,6 +63,7 @@ pub struct Challenge<'info> {
     pub match_account: Account<'info, Match>,
 
     #[account(
+        mut,
         seeds = [UserProfile::SEED.as_bytes(), user.key().as_ref()],
         bump
     )]
