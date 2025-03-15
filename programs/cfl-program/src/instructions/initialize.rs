@@ -2,9 +2,9 @@ use crate::state::*;
 
 use anchor_lang::prelude::*;
 
-pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
+pub fn initialize(ctx: Context<Initialize>, fee_in_bps: u64, fee_recipient: Pubkey) -> Result<()> {
     let global = &mut ctx.accounts.global;
-    global.set_inner(Global::new());
+    global.set_inner(Global::new(fee_in_bps, fee_recipient));
 
     Ok(())
 }

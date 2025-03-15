@@ -13,8 +13,20 @@ pub mod cfl_program {
 
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        instructions::initialize(ctx)
+    pub fn initialize(
+        ctx: Context<Initialize>,
+        fee_in_bps: u64,
+        fee_recipient: Pubkey,
+    ) -> Result<()> {
+        instructions::initialize(ctx, fee_in_bps, fee_recipient)
+    }
+
+    pub fn update_fee_settings(
+        ctx: Context<UpdateFeeSettings>,
+        new_fee_in_bps: u64,
+        fee_recipient: Pubkey,
+    ) -> Result<()> {
+        instructions::update_fee_settings(ctx, new_fee_in_bps, fee_recipient)
     }
 
     pub fn create_squad(

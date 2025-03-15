@@ -4,17 +4,19 @@ use anchor_lang::prelude::*;
 pub struct Global {
     pub match_count: u64,
     pub fee_in_bps: u64,
+    pub fee_recipient: Pubkey,
 }
 
 impl Global {
     pub const SEED: &'static str = "Global";
 
-    pub const ACCOUNT_SIZE: usize = 8 + 8 + 8;
+    pub const ACCOUNT_SIZE: usize = 8 + 8 + 8 + 32;
 
-    pub fn new() -> Self {
+    pub fn new(fee_in_bps: u64, fee_recipient: Pubkey) -> Self {
         Self {
             match_count: 0,
-            fee_in_bps: 0,
+            fee_in_bps,
+            fee_recipient,
         }
     }
 
@@ -22,8 +24,9 @@ impl Global {
         self.match_count += 1
     }
 
-    pub fn update_fee(&mut self, new_fee_in_bps: u64) {
+    pub fn update_fee_settings(&mut self, new_fee_in_bps: u64, fee_recipient: Pubkey) {
         self.fee_in_bps = new_fee_in_bps;
+        self.fee_recipient = fee_recipient;
     }
 }
 

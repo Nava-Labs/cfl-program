@@ -5,7 +5,9 @@ use anchor_lang::prelude::*;
 
 pub fn winner_claim_sol(ctx: Context<WinnerClaimSol>, _match_id: u64) -> Result<()> {
     let match_account = &mut ctx.accounts.match_account;
+    let global = &ctx.accounts.global;
     let user = &mut ctx.accounts.user;
+    let fee_recipeint = &mut ctx.accounts.fee_recipient;
     let rent = &mut ctx.accounts.rent;
 
     let squad_winner_account = &ctx.accounts.squad_winner;
@@ -22,11 +24,14 @@ pub fn winner_claim_sol(ctx: Context<WinnerClaimSol>, _match_id: u64) -> Result<
     }
 
     let account_rent = Rent::minimum_balance(rent, Match::ACCOUNT_SIZE);
+    let total_sol = match_account.get_lamports() - account_rent;
 
-    let sol_to_withdraw = match_account.get_lamports() - account_rent;
+    let fee = (global.fee_in_bps * total_sol) / 10000;
+    let sol_to_withdraw = total_sol - fee;
 
-    **match_account.to_account_info().try_borrow_mut_lamports()? -= sol_to_withdraw;
+    **match_account.to_account_info().try_borrow_mut_lamports()? -= total_sol;
     **user.try_borrow_mut_lamports()? += sol_to_withdraw;
+    **fee_recipeint.try_borrow_mut_lamports()? += fee;
 
     Ok(())
 }
@@ -44,6 +49,19 @@ pub struct WinnerClaimSol<'info> {
     /// CHECK:
     #[account(mut, owner =  crate::ID)]
     pub squad_winner: AccountInfo<'info>,
+
+    /// CHECK:
+    #[account(
+        mut,
+        constraint = fee_recipient.key() == global.fee_recipient
+    )]
+    pub fee_recipient: UncheckedAccount<'info>,
+
+    #[account(
+        seeds = [Global::SEED.as_bytes()],
+        bump,
+    )]
+    pub global: Account<'info, Global>,
 
     #[account(mut)]
     pub user: Signer<'info>,
