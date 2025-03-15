@@ -1,0 +1,17 @@
+{
+  "name": "Crypto Fantasy League Squad",
+  "symbol": "CFL Squad",
+  "description": "PvP fantasy trading game—draft, compete, and double your SOL.",
+  "seller_fee_basis_points": 0,
+  "image": "https://qjajjywjjuxozhqgpwdm.supabase.co/storage/v1/object/public/assets//nft.png",
+  "external_url": "https://www.cfl.so/",
+  "attributes": [],
+  "category": "image",
+  "creators": [
+    {
+      "address": "6Ps4s9TPf9vxMCQouX5oLHETj7rJjMPRyp7BXx6c1TM7",
+      "verified": true,
+      "share": 100
+    }
+  ]
+}
