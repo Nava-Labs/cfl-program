@@ -20,13 +20,10 @@ impl Global {
 }
 
 #[account]
-#[derive(InitSpace)]
 pub struct Squad {
     pub owner: Pubkey,
     pub squad_index: u8,
-    #[max_len(10, 66)]
-    pub token_price_feed_ids: Vec<String>,
-    #[max_len(10)]
+    pub token_price_feed_ids: [Pubkey; 10],
     pub allocations: [f64; 10],
     pub formation: u64,
     pub bump: u8,
@@ -35,12 +32,12 @@ pub struct Squad {
 impl Squad {
     pub const SEED: &'static str = "Squad";
 
-    pub const ACCOUNT_SIZE: usize = 8 + Squad::INIT_SPACE;
+    pub const ACCOUNT_SIZE: usize = 8 + 32 + 1 + (32 * 10) + (8 * 10) + 8 + 1;
 
     pub fn new(
         owner: Pubkey,
         squad_index: u8,
-        token_price_feed_ids: Vec<String>,
+        token_price_feed_ids: [Pubkey; 10],
         allocations: [f64; 10],
         formation: u64,
         bump: u8,

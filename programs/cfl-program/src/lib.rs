@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("7wHZscUp9Zn1uoupNChJybhgU6iDhZ8dof3Phe45n9zU");
+declare_id!("9KgMQgbhpwkqjUZ3RqBTpND1Kot8PwoVRy52TkWhxRh");
 
 pub mod errors;
 pub mod instructions;
@@ -20,7 +20,7 @@ pub mod cfl_program {
     pub fn create_squad(
         ctx: Context<CreateSquad>,
         squad_index: u8,
-        price_feed_ids: Vec<String>,
+        price_feed_ids: [Pubkey; 10],
         allocations: [f64; 10],
         formation: u64,
     ) -> Result<()> {
