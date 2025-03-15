@@ -3,6 +3,8 @@ use crate::state::*;
 
 use anchor_lang::{prelude::*, system_program};
 
+use mpl_core::instructions::CreateV2CpiBuilder;
+
 pub fn create_squad_and_challenge(
     ctx: Context<CreateSquadAndChallenge>,
     squad_index: u8,
@@ -63,6 +65,23 @@ pub fn create_squad_and_challenge(
         ctx.bumps.squad,
     ));
 
+    // mpl -- mint nft squad
+    CreateV2CpiBuilder::new(&ctx.accounts.mpl_core_program.to_account_info())
+        .asset(&ctx.accounts.asset.to_account_info())
+        .authority(Some(&squad.to_account_info()))
+        .payer(&user.to_account_info())
+        .owner(Some(&user.to_account_info()))
+        .update_authority(Some(&squad.to_account_info()))
+        .system_program(&ctx.accounts.system_program.to_account_info())
+        .name(format!("{}, {}", squad_index, &user.key()))
+        .uri("".to_string())
+        .invoke_signed(&[&[
+            Squad::SEED.as_bytes(),
+            user.key().as_ref(),
+            squad_index.to_le_bytes().as_ref(),
+            &[ctx.bumps.squad],
+        ]])?;
+
     // direct update the profile state
     profile.user = owner;
 
@@ -88,6 +107,9 @@ pub fn create_squad_and_challenge(
 #[derive(Accounts)]
 #[instruction(squad_index: u8, match_id: u64)]
 pub struct CreateSquadAndChallenge<'info> {
+    #[account(mut)]
+    pub asset: Signer<'info>,
+
     #[account(
         init,
         payer = user,
@@ -117,4 +139,7 @@ pub struct CreateSquadAndChallenge<'info> {
     pub user: Signer<'info>,
 
     pub system_program: Program<'info, System>,
+
+    /// CHECK: this account is checked by the address constraint
+    pub mpl_core_program: UncheckedAccount<'info>,
 }

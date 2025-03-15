@@ -11,10 +11,15 @@ cfl_program = "7wHZscUp9Zn1uoupNChJybhgU6iDhZ8dof3Phe45n9zU"
 url = "https://api.apr.dev"
 
 [provider]
-# cluster = "https://rpc.mainnet-alpha.sonic.game"
-# cluster = "https://api.testnet.sonic.game/"
-cluster = "Localnet"
+# cluster = "https://sonic.helius-rpc.com/"
+cluster = "https://api.testnet.sonic.game/"
+# cluster = "Localnet"
+# cluster = "Devnet"
 wallet = "./environment/deployer.json"
+
+[[test.genesis]]
+address = "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"  
+program = "tests/metaplex_core_program.so"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

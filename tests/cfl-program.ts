@@ -3,6 +3,8 @@ import { Program, Wallet } from "@coral-xyz/anchor";
 import * as borsh from "@coral-xyz/borsh";
 import {
   AccountInfo,
+  ComputeBudgetInstruction,
+  ComputeBudgetProgram,
   Connection,
   Keypair,
   LAMPORTS_PER_SOL,
@@ -14,6 +16,7 @@ import {
 import { CflProgram } from "../target/types/cfl_program";
 import { PythSolanaReceiver } from "@pythnetwork/pyth-solana-receiver";
 import { BN } from "bn.js";
+import { MPL_CORE_PROGRAM_ID } from "@metaplex-foundation/mpl-core";
 
 const secretKeyDeployer = Uint8Array.from(
   require("../environment/deployer.json"),
@@ -78,6 +81,8 @@ describe("cfl-program", () => {
   });
 
   it("Squad Created! by Deployer", async () => {
+    let keypairAsset = Keypair.generate();
+
     const pf1 =
       "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43";
     const pf2 =
@@ -133,19 +138,26 @@ describe("cfl-program", () => {
     const ix = await program.methods
       .createSquad(1, pfs, percentages, formation)
       .accounts({
+        asset: keypairAsset.publicKey,
         // @ts-ignore
         squad,
         userProfile: profile,
         user: keypairDeployer.publicKey,
+        mplCoreProgram: MPL_CORE_PROGRAM_ID,
       })
       .instruction();
 
     const tx = new Transaction().add(ix);
     tx.feePayer = keypairDeployer.publicKey;
 
-    await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
-      skipPreflight: false,
-    });
+    await sendAndConfirmTransaction(
+      connection,
+      tx,
+      [keypairAsset, keypairDeployer],
+      {
+        skipPreflight: false,
+      },
+    );
 
     // const profileState = await program.account.userProfile.fetch(profile);
     // console.log("Profile State", JSON.stringify(profileState, null, 3));
@@ -155,6 +167,8 @@ describe("cfl-program", () => {
   });
 
   it("Squad Created! by User", async () => {
+    let keypairAsset = Keypair.generate();
+
     const pf1 =
       "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43";
     const pf2 =
@@ -210,19 +224,26 @@ describe("cfl-program", () => {
     const ix = await program.methods
       .createSquad(1, pfs, percentages, formation)
       .accounts({
+        asset: keypairAsset.publicKey,
         // @ts-ignore
         squad,
         userProfile: profile,
         user: keypairUser.publicKey,
+        mplCoreProgram: MPL_CORE_PROGRAM_ID,
       })
       .instruction();
 
     const tx = new Transaction().add(ix);
     tx.feePayer = keypairUser.publicKey;
 
-    await sendAndConfirmTransaction(connection, tx, [keypairUser], {
-      skipPreflight: false,
-    });
+    await sendAndConfirmTransaction(
+      connection,
+      tx,
+      [keypairAsset, keypairUser],
+      {
+        skipPreflight: false,
+      },
+    );
 
     console.log(await connection.simulateTransaction(tx));
 
@@ -233,39 +254,39 @@ describe("cfl-program", () => {
     console.log("Squad State", JSON.stringify(squadState, null, 3));
   });
 
-  // it("Get Squad Created", async () => {
-  //   const allAccountsOwned = await connection.getProgramAccounts(
-  //     new PublicKey(program.idl.address),
-  //     {
-  //       // dataSlice: { offset: 8, length: 32 },
-  //       filters: [{ dataSize: 844 }],
-  //     },
-  //   );
-  //   // console.log(allAccountsOwned);
+  it("Get Squad Created", async () => {
+    const allAccountsOwned = await connection.getProgramAccounts(
+      new PublicKey(program.idl.address),
+      {
+        // dataSlice: { offset: 8, length: 32 },
+        filters: [{ dataSize: 844 }],
+      },
+    );
+    // console.log(allAccountsOwned);
 
-  //   const decodedDatas = allAccountsOwned.map((x) => {
-  //     return decodeSquadAccountData(x.account.data);
-  //   });
-  //   console.log("decoded squad account", JSON.stringify(decodedDatas, null, 4));
-  // });
+    const decodedDatas = allAccountsOwned.map((x) => {
+      return decodeSquadAccountData(x.account.data);
+    });
+    console.log("decoded squad account", JSON.stringify(decodedDatas, null, 4));
+  });
 
-  // const decodeSquadAccountData = (buffer: Buffer) => {
-  //   const borshAccountSchema = borsh.struct([
-  //     borsh.u64("discriminator"),
-  //     borsh.publicKey("owner"),
-  //     borsh.vec(borsh.str(), "token_price_feed_ids"),
-  //     borsh.vec(borsh.f64(), "token_weghts"),
-  //     borsh.vec(borsh.i8(), "position_index"),
-  //     borsh.u8("bump"),
-  //     borsh.u8("squad_index"),
-  //   ]);
+  const decodeSquadAccountData = (buffer: Buffer) => {
+    const borshAccountSchema = borsh.struct([
+      borsh.u64("discriminator"),
+      borsh.publicKey("owner"),
+      borsh.vec(borsh.str(), "token_price_feed_ids"),
+      borsh.vec(borsh.f64(), "token_weghts"),
+      borsh.vec(borsh.i8(), "position_index"),
+      borsh.u8("bump"),
+      borsh.u8("squad_index"),
+    ]);
 
-  //   // console.log("Buffer length:", buffer.length);
+    // console.log("Buffer length:", buffer.length);
 
-  //   const decodedData = borshAccountSchema.decode(buffer);
+    const decodedData = borshAccountSchema.decode(buffer);
 
-  //   return decodedData;
-  // };
+    return decodedData;
+  };
 
   it("Match Created!", async () => {
     let [hostSquad] = PublicKey.findProgramAddressSync(
@@ -570,6 +591,8 @@ describe("cfl-program", () => {
   });
 
   it("Create squad and challenge", async () => {
+    const keypairAsset = Keypair.generate();
+
     const pf1 =
       "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43";
     const pf2 =
@@ -633,20 +656,28 @@ describe("cfl-program", () => {
     const ix = await program.methods
       .createSquadAndChallenge(squadIndex, matchId, pfs, percentages, formation)
       .accounts({
+        asset: keypairAsset.publicKey,
         // @ts-ignore
         squad,
         userProfile: profile,
         matchAccount: match,
         user: keypairUser.publicKey,
+        mplCoreProgram: MPL_CORE_PROGRAM_ID,
       })
       .instruction();
 
     const tx = new Transaction().add(ix);
     tx.feePayer = keypairUser.publicKey;
+    // tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }));
 
     console.log(await connection.simulateTransaction(tx));
-    await sendAndConfirmTransaction(connection, tx, [keypairUser], {
-      skipPreflight: false,
-    });
+    await sendAndConfirmTransaction(
+      connection,
+      tx,
+      [keypairAsset, keypairUser],
+      {
+        skipPreflight: false,
+      },
+    );
   });
 });
