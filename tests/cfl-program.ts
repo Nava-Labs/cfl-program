@@ -38,6 +38,8 @@ describe("cfl-program", () => {
 
   const wallet = new Wallet(keypairDeployer);
 
+  const keypairFeeRecipient = Keypair.generate();
+
   const pythSolanaReceiver = new PythSolanaReceiver({
     connection,
     wallet,
@@ -59,11 +61,24 @@ describe("cfl-program", () => {
 
     await sendAndConfirmTransaction(connection, tx, [keypairDeployer]);
 
-    console.log(await connection.getBalance(keypairUser.publicKey));
+    console.log(
+      "Keypair Fee Recipient Balance => ",
+      await connection.getBalance(keypairFeeRecipient.publicKey),
+    );
+
+    console.log(
+      "Keypair User Balance => ",
+      await connection.getBalance(keypairUser.publicKey),
+    );
   });
 
   it("Is initialized!", async () => {
-    const ix = await program.methods.initialize().instruction();
+    let fee = new BN(250); // 2.5%
+    let feeRecipient = keypairFeeRecipient.publicKey;
+
+    const ix = await program.methods
+      .initialize(fee, feeRecipient)
+      .instruction();
     const tx = new Transaction().add(ix);
     tx.feePayer = keypairDeployer.publicKey;
 
@@ -77,7 +92,7 @@ describe("cfl-program", () => {
     );
 
     let state = await program.account.global.fetch(global);
-    console.log(state);
+    console.log("Initial State: ", state);
   });
 
   it("Squad Created! by Deployer", async () => {
@@ -123,7 +138,6 @@ describe("cfl-program", () => {
       ],
       program.programId,
     );
-    console.log("Squad pda", squad.toBase58());
 
     const ix = await program.methods
       .createSquad(1, pfs, percentages, formation)
@@ -149,525 +163,265 @@ describe("cfl-program", () => {
       },
     );
 
-    // const profileState = await program.account.userProfile.fetch(profile);
-    // console.log("Profile State", JSON.stringify(profileState, null, 3));
+    const profileState = await program.account.userProfile.fetch(profile);
+    console.log("Profile State", JSON.stringify(profileState, null, 3));
 
-    // const squadState = await program.account.squad.fetch(squad);
-    // console.log("Squad State", JSON.stringify(squadState, null, 3));
+    const squadState = await program.account.squad.fetch(squad);
+    console.log("Squad State", JSON.stringify(squadState, null, 3));
   });
 
-  // it("Squad Created! by User", async () => {
-  //   let keypairAsset = Keypair.generate();
+  it("Squad Created! by User", async () => {
+    let keypairAsset = Keypair.generate();
 
-  //   const pf1 =
-  //     "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43";
-  //   const pf2 =
-  //     "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace";
-  //   const pf3 =
-  //     "0x2f95862b045670cd22bee3114c39763a4a08beeb663b145d283c31d7d1101c4f";
-  //   const pf4 =
-  //     "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d";
-  //   const pf5 =
-  //     "0xec5d399846a9209f3fe5881d70aae9268c94339ff9817e8d18ff19fa05eea1c8";
-  //   const pf6 =
-  //     "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d";
-  //   const pf7 =
-  //     "0x8ac0c70fff57e9aefdf5edf44b51d62c2d433653cbb2cf5cc06bb115af04d221";
-  //   const pf8 =
-  //     "0x67aed5a24fdad045475e7195c98a98aea119c763f272d4523f5bac93a4f33c2b";
-  //   const pf9 =
-  //     "0x3728e591097635310e6341af53db8b7ee42da9b3a8d918f9463ce9cca886dfbd";
-  //   const pf10 =
-  //     "0xb7a8eba68a997cd0210c2e1e4ee811ad2d174b3611c22d9ebf16f4cb7e9ba850";
+    const pf1 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
+    const pf2 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
+    const pf3 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
+    const pf4 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
+    const pf5 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
+    const pf6 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
+    const pf7 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
+    const pf8 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
+    const pf9 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
+    const pf10 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
 
-  //   const pfs = [pf1, pf2, pf3, pf4, pf5, pf6, pf7, pf8, pf9, pf10];
-  //   const percentages = [
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //   ];
+    const pfs = [pf1, pf2, pf3, pf4, pf5, pf6, pf7, pf8, pf9, pf10];
+    const percentages = [
+      parseFloat("10"),
+      parseFloat("10"),
+      parseFloat("10"),
+      parseFloat("10"),
+      parseFloat("10"),
+      parseFloat("10"),
+      parseFloat("10"),
+      parseFloat("10"),
+      parseFloat("10"),
+      parseFloat("10"),
+    ];
 
-  //   const formation = new BN(433);
+    const formation = new BN(433);
 
-  //   let [profile] = PublicKey.findProgramAddressSync(
-  //     [Buffer.from(PROFILE_SEED), keypairUser.publicKey.toBuffer()],
-  //     program.programId,
-  //   );
+    let [profile] = PublicKey.findProgramAddressSync(
+      [Buffer.from(PROFILE_SEED), keypairUser.publicKey.toBuffer()],
+      program.programId,
+    );
 
-  //   let [squad] = PublicKey.findProgramAddressSync(
-  //     [
-  //       Buffer.from(SQUAD_SEED),
-  //       keypairUser.publicKey.toBuffer(),
-  //       Buffer.from(new Uint8Array([1])),
-  //     ],
-  //     program.programId,
-  //   );
-  //   console.log("Squad pda", squad.toBase58());
+    let [squad] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(SQUAD_SEED),
+        keypairUser.publicKey.toBuffer(),
+        Buffer.from(new Uint8Array([1])),
+      ],
+      program.programId,
+    );
 
-  //   const ix = await program.methods
-  //     .createSquad(1, pfs, percentages, formation)
-  //     .accounts({
-  //       asset: keypairAsset.publicKey,
-  //       // @ts-ignore
-  //       squad,
-  //       userProfile: profile,
-  //       user: keypairUser.publicKey,
-  //       mplCoreProgram: MPL_CORE_PROGRAM_ID,
-  //     })
-  //     .instruction();
+    const ix = await program.methods
+      .createSquad(1, pfs, percentages, formation)
+      .accounts({
+        asset: keypairAsset.publicKey,
+        // @ts-ignore
+        squad,
+        userProfile: profile,
+        user: keypairUser.publicKey,
+        mplCoreProgram: MPL_CORE_PROGRAM_ID,
+      })
+      .instruction();
 
-  //   const tx = new Transaction().add(ix);
-  //   tx.feePayer = keypairUser.publicKey;
+    const tx = new Transaction().add(ix);
+    tx.feePayer = keypairUser.publicKey;
 
-  //   await sendAndConfirmTransaction(
-  //     connection,
-  //     tx,
-  //     [keypairAsset, keypairUser],
-  //     {
-  //       skipPreflight: false,
-  //     },
-  //   );
-
-  //   console.log(await connection.simulateTransaction(tx));
-
-  //   const profileState = await program.account.userProfile.fetch(profile);
-  //   console.log("Profile State", JSON.stringify(profileState, null, 3));
-
-  //   const squadState = await program.account.squad.fetch(squad);
-  //   console.log("Squad State", JSON.stringify(squadState, null, 3));
-  // });
-
-  it("Get Squad Created", async () => {
-    const allAccountsOwned = await connection.getProgramAccounts(
-      new PublicKey(program.idl.address),
+    await sendAndConfirmTransaction(
+      connection,
+      tx,
+      [keypairAsset, keypairUser],
       {
-        // dataSlice: { offset: 8, length: 32 },
-        filters: [{ dataSize: 450 }],
+        skipPreflight: false,
       },
     );
-    // console.log(allAccountsOwned);
 
-    const decodedDatas = allAccountsOwned.map((x) => {
-      return decodeSquadAccountData(x.account.data);
-    });
-    console.log("decoded squad account", JSON.stringify(decodedDatas, null, 4));
+    const profileState = await program.account.userProfile.fetch(profile);
+    console.log("Profile State", JSON.stringify(profileState, null, 3));
+
+    const squadState = await program.account.squad.fetch(squad);
+    console.log("Squad State", JSON.stringify(squadState, null, 3));
   });
 
-  const decodeSquadAccountData = (buffer: Buffer) => {
-    const borshAccountSchema = borsh.struct([
-      borsh.u64("discriminator"),
-      borsh.publicKey("owner"),
-      borsh.u8("squad_index"),
-      borsh.array(borsh.publicKey(), 10, "token_price_feed_ids"),
-      borsh.array(borsh.f64(), 10, "token_weghts"),
-      borsh.u8("formation"),
-      borsh.u8("bump"),
-    ]);
+  it("Match Created!", async () => {
+    let [hostSquad] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(SQUAD_SEED),
+        keypairDeployer.publicKey.toBuffer(),
+        Buffer.from(new Uint8Array([1])),
+      ],
+      program.programId,
+    );
 
-    // console.log("Buffer length:", buffer.length);
+    const id = new BN(1);
 
-    const decodedData = borshAccountSchema.decode(buffer);
+    let [match] = PublicKey.findProgramAddressSync(
+      [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
+      program.programId,
+    );
 
-    return decodedData;
-  };
+    const [global] = PublicKey.findProgramAddressSync(
+      [Buffer.from(GLOBAL_SEED)],
+      program.programId,
+    );
 
-  // it("Match Created!", async () => {
-  //   let [hostSquad] = PublicKey.findProgramAddressSync(
-  //     [
-  //       Buffer.from(SQUAD_SEED),
-  //       keypairDeployer.publicKey.toBuffer(),
-  //       Buffer.from(new Uint8Array([1])),
-  //     ],
-  //     program.programId,
-  //   );
+    const start = new BN(1773085020);
+    const duration = new BN(123);
+    const sol = new BN(10 * LAMPORTS_PER_SOL);
+    const matchType = 1;
 
-  //   const id = new BN(1);
+    const ix = await program.methods
+      .createMatch(id, start, duration, sol, matchType)
+      .accounts({
+        // @ts-ignore
+        hostSquad,
+        // @ts-ignore
+        matchAccount: match,
+        global,
+        user: keypairDeployer.publicKey,
+      })
+      .instruction();
 
-  //   let [match] = PublicKey.findProgramAddressSync(
-  //     [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
-  //     program.programId,
-  //   );
+    const tx = new Transaction().add(ix);
+    tx.feePayer = keypairDeployer.publicKey;
 
-  //   const [global] = PublicKey.findProgramAddressSync(
-  //     [Buffer.from(GLOBAL_SEED)],
-  //     program.programId,
-  //   );
+    await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
+      skipPreflight: false,
+    });
 
-  //   const start = new BN(1773085020);
-  //   const duration = new BN(123);
-  //   const sol = new BN(10 * LAMPORTS_PER_SOL);
-  //   const matchType = 1;
+    let state = await program.account.global.fetch(global);
+    console.log(state);
+  });
 
-  //   const ix = await program.methods
-  //     .createMatch(id, start, duration, sol, matchType)
-  //     .accounts({
-  //       // @ts-ignore
-  //       hostSquad,
-  //       // @ts-ignore
-  //       matchAccount: match,
-  //       global,
-  //       user: keypairDeployer.publicKey,
-  //     })
-  //     .instruction();
+  it("Challenge", async () => {
+    let [challengerSquad] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(SQUAD_SEED),
+        keypairUser.publicKey.toBuffer(),
+        Buffer.from(new Uint8Array([1])),
+      ],
+      program.programId,
+    );
 
-  //   const tx = new Transaction().add(ix);
-  //   tx.feePayer = keypairDeployer.publicKey;
+    const id = new BN(1);
 
-  //   console.log(await connection.simulateTransaction(tx));
+    let [match] = PublicKey.findProgramAddressSync(
+      [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
+      program.programId,
+    );
 
-  //   await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
-  //     skipPreflight: false,
-  //   });
+    const ix = await program.methods
+      .challenge(id)
+      .accounts({
+        // @ts-ignore
+        challengerSquad,
+        // @ts-ignore
+        match,
+        user: keypairUser.publicKey,
+      })
+      .instruction();
 
-  //   let state = await program.account.global.fetch(global);
-  //   console.log(state);
-  // });
+    const tx = new Transaction().add(ix);
+    tx.feePayer = keypairUser.publicKey;
 
-  // // it("Get Match Created", async () => {
-  // //   const allAccountsOwned = await connection.getProgramAccounts(
-  // //     new PublicKey(program.idl.address),
-  // //     {
-  // //       // dataSlice: { offset: 8, length: 32 },
-  // //       filters: [{ dataSize: 211 }],
-  // //     },
-  // //   );
-  // //   console.log(allAccountsOwned);
+    await sendAndConfirmTransaction(connection, tx, [keypairUser], {
+      skipPreflight: false,
+    });
 
-  // //   const decodedDatas = allAccountsOwned.map((x) => {
-  // //     return decodeMatchAccountData(x.account.data);
-  // //   });
-  // //   console.log("decoded match data", JSON.stringify(decodedDatas, null, 3));
-  // // });
+    console.log(
+      "Keypair Fee Recipient Balance => ",
+      await connection.getBalance(keypairFeeRecipient.publicKey),
+    );
 
-  // // const decodeMatchAccountData = (buffer: Buffer) => {
-  // //   const borshAccountSchema = borsh.struct([
-  // //     borsh.u64("discriminator"),
-  // //     borsh.u64("match_id"),
-  // //     borsh.publicKey("host_squad"),
-  // //     borsh.publicKey("challenger_squad"),
-  // //     borsh.publicKey("host_squad_owner"),
-  // //     borsh.publicKey("challenger_squad_owner"),
-  // //     borsh.u64("sol_bet_amount"),
-  // //     borsh.u64("duration"),
-  // //     borsh.i64("start_timestamp"),
-  // //     borsh.i64("end_timestamp"),
-  // //     borsh.bool("is_finished"),
-  // //     borsh.publicKey("winner"),
-  // //     borsh.u8("bump"),
-  // //     borsh.u8("match_type"),
-  // //   ]);
+    console.log(
+      "Keypair User Balance => ",
+      await connection.getBalance(keypairUser.publicKey),
+    );
+  });
 
-  // //   const decodedData = borshAccountSchema.decode(buffer);
+  it("Finalize", async () => {
+    const id = new BN(1);
 
-  // //   return decodedData;
-  // // };
+    let [match] = PublicKey.findProgramAddressSync(
+      [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
+      program.programId,
+    );
 
-  // it("Challenge", async () => {
-  //   let [challengerSquad] = PublicKey.findProgramAddressSync(
-  //     [
-  //       Buffer.from(SQUAD_SEED),
-  //       keypairUser.publicKey.toBuffer(),
-  //       Buffer.from(new Uint8Array([1])),
-  //     ],
-  //     program.programId,
-  //   );
+    let [winner] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(SQUAD_SEED),
+        keypairUser.publicKey.toBuffer(),
+        Buffer.from(new Uint8Array([1])),
+      ],
+      program.programId,
+    );
 
-  //   const id = new BN(1);
+    const ix = await program.methods
+      .finalize(id, winner, 1, 2)
+      .accounts({
+        // @ts-ignore
+        match,
+        user: keypairDeployer.publicKey,
+      })
+      .instruction();
 
-  //   let [match] = PublicKey.findProgramAddressSync(
-  //     [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
-  //     program.programId,
-  //   );
+    const tx = new Transaction().add(ix);
+    tx.feePayer = keypairDeployer.publicKey;
+    await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
+      skipPreflight: false,
+    });
+  });
 
-  //   const ix = await program.methods
-  //     .challenge(id)
-  //     .accounts({
-  //       // @ts-ignore
-  //       challengerSquad,
-  //       // @ts-ignore
-  //       match,
-  //       user: keypairUser.publicKey,
-  //     })
-  //     .instruction();
+  it("Claim Sol by winner", async () => {
+    const [global] = PublicKey.findProgramAddressSync(
+      [Buffer.from(GLOBAL_SEED)],
+      program.programId,
+    );
 
-  //   const tx = new Transaction().add(ix);
-  //   tx.feePayer = keypairUser.publicKey;
+    const id = new BN(1);
 
-  //   console.log(await connection.simulateTransaction(tx));
-  //   await sendAndConfirmTransaction(connection, tx, [keypairUser], {
-  //     skipPreflight: false,
-  //   });
-  // });
+    let [match] = PublicKey.findProgramAddressSync(
+      [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
+      program.programId,
+    );
 
-  // // it("Get Match Created", async () => {
-  // //   const allAccountsOwned = await connection.getProgramAccounts(
-  // //     new PublicKey(program.idl.address),
-  // //     {
-  // //       // dataSlice: { offset: 8, length: 32 },
-  // //       filters: [{ dataSize: 211 }],
-  // //     },
-  // //   );
-  // //   // console.log(allAccountsOwned);
+    let [winner] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(SQUAD_SEED),
+        keypairUser.publicKey.toBuffer(),
+        Buffer.from(new Uint8Array([1])),
+      ],
+      program.programId,
+    );
 
-  // //   const decodedDatas = allAccountsOwned.map((x) => {
-  // //     return decodeMatchAccountData(x.account.data);
-  // //   });
-  // //   console.log("decoded match data", JSON.stringify(decodedDatas, null, 3));
-  // // });
+    const ix = await program.methods
+      .winnerClaimSol(id)
+      .accounts({
+        // @ts-ignore
+        match_account: match,
+        squadWinner: winner,
+        feeRecipient: keypairFeeRecipient.publicKey,
+        global,
+        user: keypairUser.publicKey,
+      })
+      .instruction();
 
-  // it("Finalize", async () => {
-  //   const id = new BN(1);
+    const tx = new Transaction().add(ix);
+    tx.feePayer = keypairUser.publicKey;
+    await sendAndConfirmTransaction(connection, tx, [keypairUser], {
+      skipPreflight: false,
+    });
 
-  //   let [match] = PublicKey.findProgramAddressSync(
-  //     [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
-  //     program.programId,
-  //   );
+    console.log(
+      "Keypair Fee Recipient Balance => ",
+      await connection.getBalance(keypairFeeRecipient.publicKey),
+    );
 
-  //   let [winner] = PublicKey.findProgramAddressSync(
-  //     [
-  //       Buffer.from(SQUAD_SEED),
-  //       keypairUser.publicKey.toBuffer(),
-  //       Buffer.from(new Uint8Array([1])),
-  //     ],
-  //     program.programId,
-  //   );
-
-  //   const ix = await program.methods
-  //     .finalize(id, winner, 1, 2)
-  //     .accounts({
-  //       // @ts-ignore
-  //       match,
-  //       user: keypairDeployer.publicKey,
-  //     })
-  //     .instruction();
-
-  //   const tx = new Transaction().add(ix);
-  //   tx.feePayer = keypairDeployer.publicKey;
-  //   await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
-  //     skipPreflight: false,
-  //   });
-  // });
-
-  // // it("Get Match Created", async () => {
-  // //   const allAccountsOwned = await connection.getProgramAccounts(
-  // //     new PublicKey(program.idl.address),
-  // //     {
-  // //       // dataSlice: { offset: 8, length: 32 },
-  // //       filters: [{ dataSize: 211 }],
-  // //     },
-  // //   );
-  // //   // console.log(allAccountsOwned);
-
-  // //   const decodedDatas = allAccountsOwned.map((x) => {
-  // //     return decodeMatchAccountData(x.account.data);
-  // //   });
-  // //   console.log("decoded match data", JSON.stringify(decodedDatas, null, 3));
-  // // });
-
-  // it("Claim Sol by winner", async () => {
-  //   const id = new BN(1);
-
-  //   let [match] = PublicKey.findProgramAddressSync(
-  //     [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
-  //     program.programId,
-  //   );
-
-  //   let [winner] = PublicKey.findProgramAddressSync(
-  //     [
-  //       Buffer.from(SQUAD_SEED),
-  //       keypairUser.publicKey.toBuffer(),
-  //       Buffer.from(new Uint8Array([1])),
-  //     ],
-  //     program.programId,
-  //   );
-
-  //   const ix = await program.methods
-  //     .winnerClaimSol(id)
-  //     .accounts({
-  //       // @ts-ignore
-  //       match_account: match,
-  //       squadWinner: winner,
-  //       user: keypairUser.publicKey,
-  //     })
-  //     .instruction();
-
-  //   const tx = new Transaction().add(ix);
-  //   tx.feePayer = keypairUser.publicKey;
-  //   await sendAndConfirmTransaction(connection, tx, [keypairUser], {
-  //     skipPreflight: false,
-  //   });
-
-  //   console.log(await connection.getBalance(keypairUser.publicKey));
-  // });
-
-  // // it("Get Match Created", async () => {
-  // //   const allAccountsOwned = await connection.getProgramAccounts(
-  // //     new PublicKey(program.idl.address),
-  // //     {
-  // //       // dataSlice: { offset: 8, length: 32 },
-  // //       filters: [{ dataSize: 211 }],
-  // //     },
-  // //   );
-  // //   console.log(allAccountsOwned);
-
-  // //   // const decodedDatas = allAccountsOwned.map((x) => {
-  // //   //   return decodeRoomAccountData(x.account.data);
-  // //   // });
-  // //   // console.log("decoded room data", JSON.stringify(decodedDatas, null, 3));
-  // //   //
-  // // });
-  // //
-  // const sleep = async (ms: number) => {
-  //   return new Promise((r) => setTimeout(r, ms));
-  // };
-
-  // it("Match Created!", async () => {
-  //   let [hostSquad] = PublicKey.findProgramAddressSync(
-  //     [
-  //       Buffer.from(SQUAD_SEED),
-  //       keypairDeployer.publicKey.toBuffer(),
-  //       Buffer.from(new Uint8Array([1])),
-  //     ],
-  //     program.programId,
-  //   );
-
-  //   const id = new BN(2);
-
-  //   let [match] = PublicKey.findProgramAddressSync(
-  //     [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
-  //     program.programId,
-  //   );
-
-  //   const [global] = PublicKey.findProgramAddressSync(
-  //     [Buffer.from(GLOBAL_SEED)],
-  //     program.programId,
-  //   );
-
-  //   const start = new BN(1773085020);
-  //   const duration = new BN(123);
-  //   const sol = new BN(10 * LAMPORTS_PER_SOL);
-  //   const matchType = 1;
-
-  //   const ix = await program.methods
-  //     .createMatch(id, start, duration, sol, matchType)
-  //     .accounts({
-  //       // @ts-ignore
-  //       hostSquad,
-  //       // @ts-ignore
-  //       matchAccount: match,
-  //       global,
-  //       user: keypairDeployer.publicKey,
-  //     })
-  //     .instruction();
-
-  //   const tx = new Transaction().add(ix);
-  //   tx.feePayer = keypairDeployer.publicKey;
-
-  //   console.log(await connection.simulateTransaction(tx));
-
-  //   await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
-  //     skipPreflight: false,
-  //   });
-
-  //   let state = await program.account.global.fetch(global);
-  //   console.log(state);
-  // });
-
-  // it("Create squad and challenge", async () => {
-  //   const keypairAsset = Keypair.generate();
-
-  //   const pf1 =
-  //     "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43";
-  //   const pf2 =
-  //     "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace";
-  //   const pf3 =
-  //     "0x2f95862b045670cd22bee3114c39763a4a08beeb663b145d283c31d7d1101c4f";
-  //   const pf4 =
-  //     "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d";
-  //   const pf5 =
-  //     "0xec5d399846a9209f3fe5881d70aae9268c94339ff9817e8d18ff19fa05eea1c8";
-  //   const pf6 =
-  //     "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d";
-  //   const pf7 =
-  //     "0x8ac0c70fff57e9aefdf5edf44b51d62c2d433653cbb2cf5cc06bb115af04d221";
-  //   const pf8 =
-  //     "0x67aed5a24fdad045475e7195c98a98aea119c763f272d4523f5bac93a4f33c2b";
-  //   const pf9 =
-  //     "0x3728e591097635310e6341af53db8b7ee42da9b3a8d918f9463ce9cca886dfbd";
-  //   const pf10 =
-  //     "0xb7a8eba68a997cd0210c2e1e4ee811ad2d174b3611c22d9ebf16f4cb7e9ba850";
-
-  //   const pfs = [pf1, pf2, pf3, pf4, pf5, pf6, pf7, pf8, pf9, pf10];
-  //   const percentages = [
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //     parseFloat("10"),
-  //   ];
-
-  //   const formation = new BN(433);
-
-  //   let [profile] = PublicKey.findProgramAddressSync(
-  //     [Buffer.from(PROFILE_SEED), keypairUser.publicKey.toBuffer()],
-  //     program.programId,
-  //   );
-
-  //   const squadIndex = 2;
-
-  //   let [squad] = PublicKey.findProgramAddressSync(
-  //     [
-  //       Buffer.from(SQUAD_SEED),
-  //       keypairUser.publicKey.toBuffer(),
-  //       Buffer.from(new Uint8Array([squadIndex])),
-  //     ],
-  //     program.programId,
-  //   );
-
-  //   const matchId = new BN(2);
-
-  //   let [match] = PublicKey.findProgramAddressSync(
-  //     [Buffer.from(MATCH_SEED), matchId.toBuffer("le", 8)],
-  //     program.programId,
-  //   );
-
-  //   const ix = await program.methods
-  //     .createSquadAndChallenge(squadIndex, matchId, pfs, percentages, formation)
-  //     .accounts({
-  //       asset: keypairAsset.publicKey,
-  //       // @ts-ignore
-  //       squad,
-  //       userProfile: profile,
-  //       matchAccount: match,
-  //       user: keypairUser.publicKey,
-  //       mplCoreProgram: MPL_CORE_PROGRAM_ID,
-  //     })
-  //     .instruction();
-
-  //   const tx = new Transaction().add(ix);
-  //   tx.feePayer = keypairUser.publicKey;
-  //   // tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }));
-
-  //   console.log(await connection.simulateTransaction(tx));
-  //   await sendAndConfirmTransaction(
-  //     connection,
-  //     tx,
-  //     [keypairAsset, keypairUser],
-  //     {
-  //       skipPreflight: false,
-  //     },
-  //   );
-  // });
+    console.log(
+      "Keypair User Balance => ",
+      await connection.getBalance(keypairUser.publicKey),
+    );
+  });
 });
