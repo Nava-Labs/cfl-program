@@ -23,17 +23,27 @@ pub fn winner_claim_sol(ctx: Context<WinnerClaimSol>, _match_id: u64) -> Result<
         return err!(CustomError::InvalidSquadWinner);
     }
 
+    match_account.update_claim_status();
+
     let account_rent = Rent::minimum_balance(rent, Match::ACCOUNT_SIZE);
-    let total_sol = match_account.get_lamports() - account_rent;
+
+    let total_sol = match_account
+        .to_account_info()
+        .lamports()
+        .saturating_sub(account_rent);
+    msg!("total_sol {}", total_sol);
 
     let fee = (global.fee_in_bps * total_sol) / 10000;
-    let sol_to_withdraw = total_sol - fee;
+    msg!("fee {}", fee);
+
+    let sol_to_withdraw = total_sol.saturating_sub(fee);
+    msg!("sol_to_withdraw {}", sol_to_withdraw);
 
     **match_account.to_account_info().try_borrow_mut_lamports()? -= total_sol;
-    **user.try_borrow_mut_lamports()? += sol_to_withdraw;
-    **fee_recipeint.try_borrow_mut_lamports()? += fee;
 
-    match_account.update_claim_status();
+    **user.try_borrow_mut_lamports()? += sol_to_withdraw;
+
+    **fee_recipeint.try_borrow_mut_lamports()? += fee;
 
     Ok(())
 }
