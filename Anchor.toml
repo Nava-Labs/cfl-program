@@ -5,14 +5,14 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-cfl_program = "2yCL5Cxy23F11BFEnUuQmZpx2eULi8k2yU7KGaTXuk6N"
+cfl_program = "7n6fiGdy4TKzj8RkPxByu4fVVyR9b57NTZwbL39XiW34"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-# cluster = "https://sonic.helius-rpc.com/"
-cluster = "https://api.testnet.sonic.game/"
+cluster = "https://sonic.helius-rpc.com/"
+# cluster = "https://api.testnet.sonic.game/"
 # cluster = "Localnet"
 wallet = "./environment/deployer.json"
 
