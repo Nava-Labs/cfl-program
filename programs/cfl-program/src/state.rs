@@ -105,13 +105,14 @@ pub struct Match {
     pub winner: Pubkey,
     pub host_squad_mc_end: f64,
     pub challenger_squad_mc_end: f64,
+    pub is_claimed: bool,
     pub bump: u8,
 }
 
 impl Match {
     pub const SEED: &'static str = "Match";
 
-    pub const ACCOUNT_SIZE: usize = 8 + 8 + 1 + (4 * 32) + (4 * 8) + 1 + 32 + (2 * 8) + 1;
+    pub const ACCOUNT_SIZE: usize = 8 + 8 + 1 + (4 * 32) + (4 * 8) + 1 + 32 + (2 * 8) + 1 + 1;
 
     pub fn new(
         match_id: u64,
@@ -138,6 +139,7 @@ impl Match {
             winner: Pubkey::default(),
             host_squad_mc_end: 0.0,
             challenger_squad_mc_end: 0.0,
+            is_claimed: false,
             bump,
         }
     }
@@ -157,5 +159,9 @@ impl Match {
         self.winner = winner;
         self.host_squad_mc_end = host_squad_mc_end;
         self.challenger_squad_mc_end = challenger_squad_mc_end;
+    }
+
+    pub fn update_claim_status(&mut self) {
+        self.is_claimed = true;
     }
 }

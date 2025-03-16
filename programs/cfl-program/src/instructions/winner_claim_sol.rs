@@ -33,6 +33,8 @@ pub fn winner_claim_sol(ctx: Context<WinnerClaimSol>, _match_id: u64) -> Result<
     **user.try_borrow_mut_lamports()? += sol_to_withdraw;
     **fee_recipeint.try_borrow_mut_lamports()? += fee;
 
+    match_account.update_claim_status();
+
     Ok(())
 }
 

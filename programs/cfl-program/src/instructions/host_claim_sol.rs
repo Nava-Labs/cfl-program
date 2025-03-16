@@ -36,6 +36,8 @@ pub fn host_claim_sol(ctx: Context<HostClaimSol>, _match_id: u64) -> Result<()> 
 
     profile.substract_total_sol_bet(sol_to_withdraw);
 
+    match_account.update_claim_status();
+
     Ok(())
 }
 
