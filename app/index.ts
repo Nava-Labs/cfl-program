@@ -34,8 +34,8 @@ import {
   signerIdentity,
 } from "@metaplex-foundation/umi";
 
-// const connection = new Connection("https://rpc.mainnet-alpha.sonic.game");
-const connection = new Connection("https://api.testnet.sonic.game/");
+const connection = new Connection("https://rpc.mainnet-alpha.sonic.game");
+// const connection = new Connection("https://api.testnet.sonic.game/");
 // const connection = new Connection("https://api.devnet.solana.com");
 
 const secretKeyDeployer = Uint8Array.from(
@@ -254,122 +254,6 @@ async function initialize(fee: any, feeRecipient: any) {
     console.error("Error initalize:", error);
   }
 }
-
-// async function createSquadAndMatch(
-//   squadIndex: number,
-//   matchId: number,
-//   pfs: string[],
-//   allocations: number[],
-//   start: any,
-//   duration: any,
-//   solBetAmount: any,
-//   matchType: number,
-//   formation: number,
-// ) {
-//   try {
-//     const [global] = PublicKey.findProgramAddressSync(
-//       [Buffer.from(GLOBAL_SEED)],
-//       program.programId,
-//     );
-
-//     let [profile] = PublicKey.findProgramAddressSync(
-//       [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
-//       program.programId,
-//     );
-
-//     let [squad] = PublicKey.findProgramAddressSync(
-//       [
-//         Buffer.from(SQUAD_SEED),
-//         keypairDeployer.publicKey.toBuffer(),
-//         Buffer.from(new Uint8Array([squadIndex])),
-//       ],
-//       program.programId,
-//     );
-
-//     let [match] = PublicKey.findProgramAddressSync(
-//       [Buffer.from(MATCH_SEED), new BN(matchId).toBuffer("le", 8)],
-//       program.programId,
-//     );
-
-//     const tx = await program.methods
-//       .createSquadAndMatch(
-//         squadIndex,
-//         new BN(matchId),
-//         pfs,
-//         allocations,
-//         new BN(formation),
-//         start,
-//         duration,
-//         solBetAmount,
-//         matchType,
-//       )
-//       .accounts({
-//         // @ts-ignore
-//         squad,
-//         userProfile: profile,
-//         matchAccount: match,
-//         global,
-//         user: keypairDeployer.publicKey,
-//       })
-//       .signers([keypairDeployer])
-//       .rpc();
-
-//     console.log("Transaction signature", tx);
-//   } catch (error) {
-//     console.error("Error initalize:", error);
-//   }
-// }
-
-// async function createSquadAndChallenge(
-//   squadIndex: number,
-//   matchId: number,
-//   pfs: string[],
-//   allocations: number[],
-//   formation: number,
-// ) {
-//   try {
-//     let [profile] = PublicKey.findProgramAddressSync(
-//       [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
-//       program.programId,
-//     );
-
-//     let [squad] = PublicKey.findProgramAddressSync(
-//       [
-//         Buffer.from(SQUAD_SEED),
-//         keypairDeployer.publicKey.toBuffer(),
-//         Buffer.from(new Uint8Array([squadIndex])),
-//       ],
-//       program.programId,
-//     );
-
-//     let [match] = PublicKey.findProgramAddressSync(
-//       [Buffer.from(MATCH_SEED), new BN(matchId).toBuffer("le", 8)],
-//       program.programId,
-//     );
-
-//     const tx = await program.methods
-//       .createSquadAndChallenge(
-//         squadIndex,
-//         new BN(matchId),
-//         pfs,
-//         allocations,
-//         new BN(formation),
-//       )
-//       .accounts({
-//         // @ts-ignore
-//         squad,
-//         userProfile: profile,
-//         matchAccount: match,
-//         user: keypairDeployer.publicKey,
-//       })
-//       .signers([keypairDeployer])
-//       .rpc();
-
-//     console.log("Transaction signature", tx);
-//   } catch (error) {
-//     console.error("Error initalize:", error);
-//   }
-// }
 
 async function createSquad(
   pfs: string[],
