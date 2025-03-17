@@ -21,12 +21,17 @@ pub mod cfl_program {
         instructions::initialize(ctx, fee_in_bps, fee_recipient)
     }
 
-    pub fn update_fee_settings(
-        ctx: Context<UpdateFeeSettings>,
+    pub fn update_global_settings(
+        ctx: Context<UpdateGlobalSettings>,
         new_fee_in_bps: u64,
         fee_recipient: Pubkey,
+        season: u8,
     ) -> Result<()> {
-        instructions::update_fee_settings(ctx, new_fee_in_bps, fee_recipient)
+        instructions::update_global_settings(ctx, new_fee_in_bps, fee_recipient, season)
+    }
+
+    pub fn close_global_account(ctx: Context<CloseGlobalAccount>) -> Result<()> {
+        instructions::close_global_account(ctx)
     }
 
     pub fn create_squad(

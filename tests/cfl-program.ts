@@ -31,6 +31,7 @@ const GLOBAL_SEED = "Global";
 const SQUAD_SEED = "Squad";
 const PROFILE_SEED = "Profile";
 const MATCH_SEED = "Match";
+const USER_SEASON_VOLUME_SEED = "UserSeasonVolume";
 
 describe("cfl-program", () => {
   const provider = anchor.AnchorProvider.env();
@@ -268,6 +269,15 @@ describe("cfl-program", () => {
       program.programId,
     );
 
+    const [userSeasonVolume] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(USER_SEASON_VOLUME_SEED),
+        keypairDeployer.publicKey.toBuffer(),
+        Buffer.from(new Uint8Array([1])),
+      ],
+      program.programId,
+    );
+
     const start = new BN(1773085020);
     const duration = new BN(123);
     const sol = new BN(10 * LAMPORTS_PER_SOL);
@@ -281,6 +291,7 @@ describe("cfl-program", () => {
         // @ts-ignore
         matchAccount: match,
         global,
+        userSeasonVolume,
         user: keypairDeployer.publicKey,
       })
       .instruction();
@@ -332,6 +343,29 @@ describe("cfl-program", () => {
       program.programId,
     );
 
+    const [global] = PublicKey.findProgramAddressSync(
+      [Buffer.from(GLOBAL_SEED)],
+      program.programId,
+    );
+
+    const [hostOwnerSeasonVolume] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(USER_SEASON_VOLUME_SEED),
+        keypairDeployer.publicKey.toBuffer(),
+        Buffer.from(new Uint8Array([1])),
+      ],
+      program.programId,
+    );
+
+    const [challengerOwnerSeasonVolume] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from(USER_SEASON_VOLUME_SEED),
+        keypairUser.publicKey.toBuffer(),
+        Buffer.from(new Uint8Array([1])),
+      ],
+      program.programId,
+    );
+
     const ix = await program.methods
       .challenge(id)
       .accounts({
@@ -341,6 +375,9 @@ describe("cfl-program", () => {
         match,
         challengerOwnerProfile,
         hostOwnerProfile,
+        global,
+        hostOwnerSeasonVolume,
+        challengerOwnerSeasonVolume,
         user: keypairUser.publicKey,
       })
       .instruction();
@@ -370,6 +407,10 @@ describe("cfl-program", () => {
       challengerOwnerProfile,
     );
     console.log(challengerOwnerProfileState);
+
+    let hostOwnerSeasonVolmueState =
+      await program.account.userSeasonVolume.fetch(hostOwnerSeasonVolume);
+    console.log(hostOwnerSeasonVolmueState);
   });
 
   it("Finalize", async () => {

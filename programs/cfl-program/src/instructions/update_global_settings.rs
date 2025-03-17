@@ -4,20 +4,21 @@ use anchor_lang::prelude::*;
 
 use crate::state::Global;
 
-pub fn update_fee_settings(
-    ctx: Context<UpdateFeeSettings>,
+pub fn update_global_settings(
+    ctx: Context<UpdateGlobalSettings>,
     new_fee_in_bps: u64,
     fee_recipient: Pubkey,
+    season: u8,
 ) -> Result<()> {
     let global = &mut ctx.accounts.global;
 
-    global.update_fee_settings(new_fee_in_bps, fee_recipient);
+    global.update_global_settings(new_fee_in_bps, fee_recipient, season);
 
     Ok(())
 }
 
 #[derive(Accounts)]
-pub struct UpdateFeeSettings<'info> {
+pub struct UpdateGlobalSettings<'info> {
     #[account(
         mut,
         seeds = [Global::SEED.as_bytes()],

@@ -12,7 +12,7 @@ pub fn initialize(ctx: Context<Initialize>, fee_in_bps: u64, fee_recipient: Pubk
 #[derive(Accounts)]
 pub struct Initialize<'info> {
     #[account(
-        init,
+        init_if_needed,
         space = Global::ACCOUNT_SIZE,
         payer = user,
         seeds = [Global::SEED.as_bytes()],

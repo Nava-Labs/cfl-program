@@ -1,6 +1,5 @@
 use crate::errors::CustomError;
 use crate::state::*;
-
 use anchor_lang::{prelude::*, system_program};
 
 pub fn create_match(
@@ -14,6 +13,7 @@ pub fn create_match(
     let match_account = &mut ctx.accounts.match_account;
     let user = &mut ctx.accounts.user;
     let global = &mut ctx.accounts.global;
+    let user_season_volume = &mut ctx.accounts.user_season_volume;
 
     let host_squad_account = &ctx.accounts.host_squad;
     let mut host_squad_account_data: &[u8] = &host_squad_account.data.borrow();
@@ -60,6 +60,9 @@ pub fn create_match(
 
     global.increment();
 
+    user_season_volume.user = user.key();
+    user_season_volume.season = global.current_season;
+
     Ok(())
 }
 
@@ -85,6 +88,15 @@ pub struct CreateMatch<'info> {
         bump,
     )]
     pub global: Account<'info, Global>,
+
+    #[account(
+        init_if_needed,
+        payer = user,
+        space = UserSeasonVolume::ACCOUNT_SIZE,
+        seeds = [UserSeasonVolume::SEED.as_bytes(), user.key().as_ref(), global.current_season.to_le_bytes().as_ref()],
+        bump
+    )]
+    pub user_season_volume: Account<'info, UserSeasonVolume>,
 
     #[account(mut)]
     pub user: Signer<'info>,
