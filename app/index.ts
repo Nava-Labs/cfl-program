@@ -18,16 +18,74 @@ import { CflProgram } from "../target/types/cfl_program";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 // @ts-ignore
 import IDL from "../target/idl/cfl_program.json";
+import {
+  create,
+  fetchAsset,
+  getAssetV1GpaBuilder,
+  Key,
+  mplCore,
+  MPL_CORE_PROGRAM_ID,
+  transferV1,
+} from "@metaplex-foundation/mpl-core";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import {
+  createSignerFromKeypair,
+  generateSigner,
+  signerIdentity,
+} from "@metaplex-foundation/umi";
 
-const secretKeyDeployer = Uint8Array.from(require("../environment/ahau.json"));
+// const connection = new Connection("https://rpc.mainnet-alpha.sonic.game");
+const connection = new Connection("https://api.testnet.sonic.game/");
+// const connection = new Connection("https://api.devnet.solana.com");
+
+const secretKeyDeployer = Uint8Array.from(
+  require("../environment/deployer.json"),
+);
 const keypairDeployer = Keypair.fromSecretKey(secretKeyDeployer);
+
+const secretKeyFeeRecipient = Uint8Array.from(
+  require("../environment/fee-recipient.json"),
+);
+const keypairFeeRecipient = Keypair.fromSecretKey(secretKeyFeeRecipient);
 
 const GLOBAL_SEED = "Global";
 const SQUAD_SEED = "Squad";
 const PROFILE_SEED = "Profile";
 const MATCH_SEED = "Match";
+const USER_SEASON_VOLUME_SEED = "UserSeasonVolume";
+
+// const umi = createUmi("https://rpc.mainnet-alpha.sonic.game").use(mplCore());
+
+// let keypairUmi = umi.eddsa.createKeypairFromSecretKey(secretKeyDeployer);
+
+// Before Umi can use this Keypair you need to generate
+// a Signer type with it.
+// const signer = createSignerFromKeypair(umi, keypairUmi);
+
+// umi.use(signerIdentity(signer));
 
 async function main() {
+  // const assetSigner = generateSigner(umi);
+  // const result = await create(umi, {
+  //   asset: assetSigner,
+  //   name: "My Asset",
+  //   uri: "https://example.com/my-asset.json",
+  // }).sendAndConfirm(umi);
+  // console.log(result);
+  // const assetsByOwner = await getAssetV1GpaBuilder(umi)
+  //   .whereField("key", Key.AssetV1)
+  //   // @ts-ignore
+  //   .whereField("owner", keypairDeployer.publicKey)
+  //   .getDeserialized();
+  // console.log(assetsByOwner);
+  // const pythSolanaReceiver = new PythSolanaReceiver({ connection, wallet });
+  // const solUsdPriceFeedAccount = pythSolanaReceiver
+  //   .getPriceFeedAccountAddress(
+  //     1,
+  //     "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
+  //   )
+  //   .toBase58();
+  // console.log(solUsdPriceFeedAccount);
   /// =================================================== \\\
   // const squadIndex = 3;
   // const matchId = 1;
@@ -72,75 +130,73 @@ async function main() {
   //   allocations,
   //   formation,
   // );
+  // / =================================================== \\\
+  // / =================================================== \\\
+  // / =================================================== \\\
+  // / =================================================== \\\
+  // / =================================================== \\\
 
-  // / =================================================== \\\
-  // / =================================================== \\\
-  // / =================================================== \\\
-  // / =================================================== \\\
-  // / =================================================== \\\
-  // await initialize();
+  let fee = new BN(250); // 2.5%
+  let feeRecipient = keypairFeeRecipient.publicKey;
+  await initialize(fee, feeRecipient);
+  // await updateGlobalSettings(fee, feeRecipient, 1);
+  // await closeGlobalAccount();
 
   // / =================================================== \\\
   // const squadIndex = 1;
-  // const pf1 =
-  //   "0xb2748e718cf3a75b0ca099cb467aea6aa8f7d960b381b3970769b5a2d6be26dc";
-  // const pf2 =
-  //   "0x30e4780570973e438fdb3f1b7ad22618b2fc7333b65c7853a7ca144c39052f7a";
-  // const pf3 =
-  //   "0xd98869edbb4a0d2803dc1054405bceb1ddc546bfc9a3d0e31bb0e0448e6181e1";
-  // const pf4 =
-  //   "0x514aed52ca5294177f20187ae883cec4a018619772ddce41efcc36a6448f5d5d";
-  // const pf5 =
-  //   "0xf4cb880742ecf6525885a239968914798c44cd83749856a6dff5c140ba5bf69b";
-  // const pf6 =
-  //   "0x8414cfadf82f6bed644d2e399c11df21ec0131aa574c56030b132113dbbf3a0a";
-  // const pf7 =
-  //   "0x879551021853eec7a7dc827578e8e69da7e4fa8148339aa0d3d5296405be4b1a";
-  // const pf8 =
-  //   "0x0fc54579a29ba60a08fdb5c28348f22fd3bec18e221dd6b90369950db638a5a7";
-  // const pf9 =
-  //   "0x5cc87aaa7df22e5ac77f6a4bc50569129eb00396fd9fd68569e748e7e96fdf90";
-  // const pf10 =
-  //   "0x4d716b908b470fabc1f9eeaf62ad32424b2388bf981401385df19ead98499c7c";
+  // const pf1 = "7UVimffxr9ow1uXYxsr4LHAcV58mLzhmwaeKvJ1pjLiE";
+  // const pf2 = "AD8TsWft2b715Vh92NUTwAiu8csPBPmKy3B7BsFzyfVb";
+  // const pf3 = "6UxPR2nXJNNM1nESVWGAf8NXMVu3SGgYf3ZfUFoGB9cs";
+  // const pf4 = "gWzECufoh81TGMrRRD9QnTUjHQpGW1kywXu8PZYLhmF";
+  // const pf5 = "6B23K3tkb51vLZA14jcEQVCA1pfHptzEHFA93V5dYwbT";
+  // const pf6 = "6B23K3tkb51vLZA14jcEQVCA1pfHptzEHFA93V5dYwbT";
+  // const pf7 = "BqostroUNoGWabof1Rm95TLNXRivjgzfM6GetpwTfotq";
+  // const pf8 = "9vNb2tQoZ8bB4vzMbQLWViGwNaDJVtct13AGgno1wazp";
+  // const pf9 = "27zzC5wXCeZeuJ3h9uAJzV5tGn6r5Tzo98S1ZceYKEb8";
+  // const pf10 = "BxizdE1Rd9yeCXUaorGNGLc4qHbqBULxiBtjRX37HjSV";
   // const pfs = [pf1, pf2, pf3, pf4, pf5, pf6, pf7, pf8, pf9, pf10];
   // const percentages = [
-  //   parseFloat("20"),
   //   parseFloat("10"),
   //   parseFloat("10"),
   //   parseFloat("10"),
   //   parseFloat("10"),
-  //   parseFloat("20"),
-  //   parseFloat("5"),
-  //   parseFloat("5"),
-  //   parseFloat("5"),
-  //   parseFloat("5"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
+  //   parseFloat("10"),
   // ];
-  // const formation = 433;
+  // const formation = 352;
   // await createSquad(pfs, percentages, squadIndex, formation);
-
-  /// =================================================== \\\
-  // const matchId = new BN(1);
-  // const start = new BN(1741723200);
-  // const duration = new BN(600);
-  // const sol = new BN(0.01 * LAMPORTS_PER_SOL);
+  // / =================================================== \\\
+  // const matchId = new BN(2);
+  // const start = new BN(1742089800);
+  // const duration = new BN(150);
+  // const sol = new BN(0.001 * LAMPORTS_PER_SOL);
   // const squadIndex = 1;
   // const matchType = 0;
   // await createMatch(matchId, start, duration, sol, squadIndex, matchType);
   // / =================================================== \\\
-
+  //
   // const matchId = new BN(1);
   // const challengerSquadIndex = 1;
   // await challenge(matchId, challengerSquadIndex);
   /// =================================================== \\\
-
-  const matchId = new BN(1);
-  const winner = new PublicKey("9aEdMzEfntF4F89drbRJTZP8V3s3q1EAZ7dXaWLw7hfb");
-  await finalize(matchId, winner, parseFloat("69.69"), parseFloat("12.212"));
+  // const matchId = new BN(2);
+  // const winner = new PublicKey("A15LHoR59wZLn4ho3ApeGTHXYrdygysW4a5QF7M8ekfU");
+  // await finalize(
+  //   matchId,
+  //   winner,
+  //   parseFloat("231287195.71011776"),
+  //   parseFloat("252994605.51299322"),
+  // );
+  //
+  // const matchId = new BN(1);
+  // await winnerClaimSol(matchId);
 }
 
 // const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
-
-const connection = new Connection("https://api.testnet.sonic.game/");
 
 const provider = new AnchorProvider(
   connection,
@@ -153,7 +209,30 @@ const wallet = new anchor.Wallet(keypairDeployer);
 
 const program = new Program(IDL as CflProgram, provider);
 
-async function initialize() {
+// async function closeGlobalAccount() {
+//   try {
+//     const [global] = PublicKey.findProgramAddressSync(
+//       [Buffer.from(GLOBAL_SEED)],
+//       program.programId,
+//     );
+
+//     const tx = await program.methods
+//       .closeGlobalAccount()
+//       .accounts({
+//         // @ts-ignore
+//         global,
+//         receiver: keypairDeployer.publicKey,
+//       })
+//       .signers([keypairDeployer])
+//       .rpc();
+
+//     console.log("Transaction signature", tx);
+//   } catch (error) {
+//     console.error("Error initalize:", error);
+//   }
+// }
+
+async function initialize(fee: any, feeRecipient: any) {
   try {
     const [global] = PublicKey.findProgramAddressSync(
       [Buffer.from(GLOBAL_SEED)],
@@ -161,7 +240,7 @@ async function initialize() {
     );
 
     const tx = await program.methods
-      .initialize()
+      .initialize(fee, feeRecipient)
       .accounts({
         // @ts-ignore
         global,
@@ -241,56 +320,56 @@ async function initialize() {
 //   }
 // }
 
-async function createSquadAndChallenge(
-  squadIndex: number,
-  matchId: number,
-  pfs: string[],
-  allocations: number[],
-  formation: number,
-) {
-  try {
-    let [profile] = PublicKey.findProgramAddressSync(
-      [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
-      program.programId,
-    );
+// async function createSquadAndChallenge(
+//   squadIndex: number,
+//   matchId: number,
+//   pfs: string[],
+//   allocations: number[],
+//   formation: number,
+// ) {
+//   try {
+//     let [profile] = PublicKey.findProgramAddressSync(
+//       [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
+//       program.programId,
+//     );
 
-    let [squad] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from(SQUAD_SEED),
-        keypairDeployer.publicKey.toBuffer(),
-        Buffer.from(new Uint8Array([squadIndex])),
-      ],
-      program.programId,
-    );
+//     let [squad] = PublicKey.findProgramAddressSync(
+//       [
+//         Buffer.from(SQUAD_SEED),
+//         keypairDeployer.publicKey.toBuffer(),
+//         Buffer.from(new Uint8Array([squadIndex])),
+//       ],
+//       program.programId,
+//     );
 
-    let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), new BN(matchId).toBuffer("le", 8)],
-      program.programId,
-    );
+//     let [match] = PublicKey.findProgramAddressSync(
+//       [Buffer.from(MATCH_SEED), new BN(matchId).toBuffer("le", 8)],
+//       program.programId,
+//     );
 
-    const tx = await program.methods
-      .createSquadAndChallenge(
-        squadIndex,
-        new BN(matchId),
-        pfs,
-        allocations,
-        new BN(formation),
-      )
-      .accounts({
-        // @ts-ignore
-        squad,
-        userProfile: profile,
-        matchAccount: match,
-        user: keypairDeployer.publicKey,
-      })
-      .signers([keypairDeployer])
-      .rpc();
+//     const tx = await program.methods
+//       .createSquadAndChallenge(
+//         squadIndex,
+//         new BN(matchId),
+//         pfs,
+//         allocations,
+//         new BN(formation),
+//       )
+//       .accounts({
+//         // @ts-ignore
+//         squad,
+//         userProfile: profile,
+//         matchAccount: match,
+//         user: keypairDeployer.publicKey,
+//       })
+//       .signers([keypairDeployer])
+//       .rpc();
 
-    console.log("Transaction signature", tx);
-  } catch (error) {
-    console.error("Error initalize:", error);
-  }
-}
+//     console.log("Transaction signature", tx);
+//   } catch (error) {
+//     console.error("Error initalize:", error);
+//   }
+// }
 
 async function createSquad(
   pfs: string[],
@@ -299,6 +378,8 @@ async function createSquad(
   formation: number,
 ) {
   try {
+    let keypairAsset = Keypair.generate();
+
     let [profile] = PublicKey.findProgramAddressSync(
       [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
       program.programId,
@@ -313,15 +394,24 @@ async function createSquad(
       program.programId,
     );
 
+    let pfsFinal = [];
+
+    for (const pf of pfs) {
+      pfsFinal.push(new PublicKey(pf));
+    }
+
     const tx = await program.methods
-      .createSquad(squadIndex, pfs, percentage, new BN(formation))
+      .createSquad(squadIndex, pfsFinal, percentage, new BN(formation))
       .accounts({
+        // @ts-ignore
+        asset: keypairAsset.publicKey,
         // @ts-ignore
         squad,
         userProfile: profile,
         user: keypairDeployer.publicKey,
+        mplCoreProgram: MPL_CORE_PROGRAM_ID,
       })
-      .signers([keypairDeployer])
+      .signers([keypairAsset, keypairDeployer])
       .rpc();
 
     console.log("Transaction signature", tx);
@@ -435,6 +525,69 @@ async function finalize(
       match,
       user: keypairDeployer.publicKey,
       rent: SYSVAR_RENT_PUBKEY,
+    })
+    .instruction();
+
+  const tx = new Transaction().add(ix);
+  tx.feePayer = keypairDeployer.publicKey;
+  await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
+    skipPreflight: false,
+  });
+
+  console.log(tx);
+}
+
+async function winnerClaimSol(matchId: any) {
+  const [global] = PublicKey.findProgramAddressSync(
+    [Buffer.from(GLOBAL_SEED)],
+    program.programId,
+  );
+
+  let [match] = PublicKey.findProgramAddressSync(
+    [Buffer.from(MATCH_SEED), matchId.toBuffer("le", 8)],
+    program.programId,
+  );
+
+  const ix = await program.methods
+    .winnerClaimSol(matchId)
+    .accounts({
+      // @ts-ignore
+      matchAccount: match,
+      squadWinner: new PublicKey(
+        "BoDNKw2AwtLhVh5RMs9cVfWETSsADyGCgHsDZ3QAkmXj",
+      ),
+      feeRecipient: keypairFeeRecipient.publicKey,
+      global,
+      user: keypairDeployer.publicKey,
+      rent: SYSVAR_RENT_PUBKEY,
+    })
+    .instruction();
+
+  const tx = new Transaction().add(ix);
+  tx.feePayer = keypairDeployer.publicKey;
+  await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
+    skipPreflight: true,
+  });
+
+  console.log(tx);
+}
+
+async function updateGlobalSettings(
+  newFeeInBps: any,
+  feeRecipient: any,
+  season: any,
+) {
+  const [global] = PublicKey.findProgramAddressSync(
+    [Buffer.from(GLOBAL_SEED)],
+    program.programId,
+  );
+
+  const ix = await program.methods
+    .updateGlobalSettings(newFeeInBps, feeRecipient, season)
+    .accounts({
+      // @ts-ignore
+      global,
+      user: keypairDeployer.publicKey,
     })
     .instruction();
 
