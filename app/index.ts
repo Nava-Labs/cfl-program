@@ -572,33 +572,33 @@ async function winnerClaimSol(matchId: any) {
   console.log(tx);
 }
 
-async function updateGlobalSettings(
-  newFeeInBps: any,
-  feeRecipient: any,
-  season: any,
-) {
-  const [global] = PublicKey.findProgramAddressSync(
-    [Buffer.from(GLOBAL_SEED)],
-    program.programId,
-  );
+// async function updateGlobalSettings(
+//   newFeeInBps: any,
+//   feeRecipient: any,
+//   season: any,
+// ) {
+//   const [global] = PublicKey.findProgramAddressSync(
+//     [Buffer.from(GLOBAL_SEED)],
+//     program.programId,
+//   );
 
-  const ix = await program.methods
-    .updateGlobalSettings(newFeeInBps, feeRecipient, season)
-    .accounts({
-      // @ts-ignore
-      global,
-      user: keypairDeployer.publicKey,
-    })
-    .instruction();
+//   const ix = await program.methods
+//     .updateGlobalSettings(newFeeInBps, feeRecipient, season)
+//     .accounts({
+//       // @ts-ignore
+//       global,
+//       user: keypairDeployer.publicKey,
+//     })
+//     .instruction();
 
-  const tx = new Transaction().add(ix);
-  tx.feePayer = keypairDeployer.publicKey;
-  await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
-    skipPreflight: false,
-  });
+//   const tx = new Transaction().add(ix);
+//   tx.feePayer = keypairDeployer.publicKey;
+//   await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
+//     skipPreflight: false,
+//   });
 
-  console.log(tx);
-}
+//   console.log(tx);
+// }
 
 async function getAllSquad() {
   const allAccountsOwned = await connection.getProgramAccounts(
