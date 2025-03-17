@@ -17,6 +17,7 @@ import { CflProgram } from "../target/types/cfl_program";
 import { PythSolanaReceiver } from "@pythnetwork/pyth-solana-receiver";
 import { BN } from "bn.js";
 import { MPL_CORE_PROGRAM_ID } from "@metaplex-foundation/mpl-core";
+import { keypairIdentity } from "@metaplex-foundation/umi";
 
 const secretKeyDeployer = Uint8Array.from(
   require("../environment/deployer.json"),
@@ -293,6 +294,15 @@ describe("cfl-program", () => {
 
     let state = await program.account.global.fetch(global);
     console.log(state);
+
+    let [hostOwnerProfile] = PublicKey.findProgramAddressSync(
+      [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
+      program.programId,
+    );
+
+    let profileState =
+      await program.account.userProfile.fetch(hostOwnerProfile);
+    console.log(profileState);
   });
 
   it("Challenge", async () => {
@@ -312,6 +322,16 @@ describe("cfl-program", () => {
       program.programId,
     );
 
+    let [hostOwnerProfile] = PublicKey.findProgramAddressSync(
+      [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
+      program.programId,
+    );
+
+    let [challengerOwnerProfile] = PublicKey.findProgramAddressSync(
+      [Buffer.from(PROFILE_SEED), keypairUser.publicKey.toBuffer()],
+      program.programId,
+    );
+
     const ix = await program.methods
       .challenge(id)
       .accounts({
@@ -319,6 +339,8 @@ describe("cfl-program", () => {
         challengerSquad,
         // @ts-ignore
         match,
+        challengerOwnerProfile,
+        hostOwnerProfile,
         user: keypairUser.publicKey,
       })
       .instruction();
@@ -339,6 +361,15 @@ describe("cfl-program", () => {
       "Keypair User Balance => ",
       await connection.getBalance(keypairUser.publicKey),
     );
+
+    let hostOwnerProfileState =
+      await program.account.userProfile.fetch(hostOwnerProfile);
+    console.log(hostOwnerProfileState);
+
+    let challengerOwnerProfileState = await program.account.userProfile.fetch(
+      challengerOwnerProfile,
+    );
+    console.log(challengerOwnerProfileState);
   });
 
   it("Finalize", async () => {

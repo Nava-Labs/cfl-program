@@ -6,7 +6,6 @@ use anchor_lang::prelude::*;
 pub fn host_claim_sol(ctx: Context<HostClaimSol>, _match_id: u64) -> Result<()> {
     let match_account = &mut ctx.accounts.match_account;
     let user = &mut ctx.accounts.user;
-    let profile = &mut ctx.accounts.user_profile;
     let rent = &mut ctx.accounts.rent;
 
     let host_squad_account = &ctx.accounts.host_squad;
@@ -34,8 +33,6 @@ pub fn host_claim_sol(ctx: Context<HostClaimSol>, _match_id: u64) -> Result<()> 
     **match_account.to_account_info().try_borrow_mut_lamports()? -= sol_to_withdraw;
     **user.try_borrow_mut_lamports()? += sol_to_withdraw;
 
-    profile.substract_total_sol_bet(sol_to_withdraw);
-
     match_account.update_claim_status();
 
     Ok(())
@@ -54,13 +51,6 @@ pub struct HostClaimSol<'info> {
     /// CHECK:
     #[account(mut, owner =  crate::ID)]
     pub host_squad: AccountInfo<'info>,
-
-    #[account(
-        mut,
-        seeds = [UserProfile::SEED.as_bytes(), user.key().as_ref()],
-        bump
-    )]
-    pub user_profile: Account<'info, UserProfile>,
 
     #[account(mut)]
     pub user: Signer<'info>,
