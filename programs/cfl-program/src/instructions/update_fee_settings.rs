@@ -4,14 +4,15 @@ use anchor_lang::prelude::*;
 
 use crate::state::Global;
 
-pub fn update_fee_settings(
+pub fn update_global_settings(
     ctx: Context<UpdateFeeSettings>,
     new_fee_in_bps: u64,
     fee_recipient: Pubkey,
+    current_season: u8,
 ) -> Result<()> {
     let global = &mut ctx.accounts.global;
 
-    global.update_fee_settings(new_fee_in_bps, fee_recipient);
+    global.update_global_settings(new_fee_in_bps, fee_recipient, current_season);
 
     Ok(())
 }

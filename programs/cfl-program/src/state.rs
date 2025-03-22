@@ -5,18 +5,22 @@ pub struct Global {
     pub match_count: u64,
     pub fee_in_bps: u64,
     pub fee_recipient: Pubkey,
+    pub current_season: u8,
 }
 
 impl Global {
     pub const SEED: &'static str = "Global";
 
-    pub const ACCOUNT_SIZE: usize = 8 + 8 + 8 + 32;
+    // NOTE: OLD, before migration
+    // pub const ACCOUNT_SIZE: usize = 8 + 8 + 8 + 32;
+    pub const ACCOUNT_SIZE: usize = 8 + 8 + 8 + 32 + 8;
 
     pub fn new(fee_in_bps: u64, fee_recipient: Pubkey) -> Self {
         Self {
             match_count: 0,
             fee_in_bps,
             fee_recipient,
+            current_season: 0,
         }
     }
 
@@ -24,9 +28,15 @@ impl Global {
         self.match_count += 1
     }
 
-    pub fn update_fee_settings(&mut self, new_fee_in_bps: u64, fee_recipient: Pubkey) {
+    pub fn update_global_settings(
+        &mut self,
+        new_fee_in_bps: u64,
+        fee_recipient: Pubkey,
+        season: u8,
+    ) {
         self.fee_in_bps = new_fee_in_bps;
         self.fee_recipient = fee_recipient;
+        self.current_season = season;
     }
 }
 
@@ -86,6 +96,25 @@ impl UserProfile {
 
     pub fn substract_total_sol_bet(&mut self, sol_amount: u64) {
         self.total_sol_bet -= sol_amount;
+    }
+}
+
+#[account]
+pub struct UserSeason {
+    pub user: Pubkey,
+    pub season: u8,
+    pub total_sol_bet: u64,
+}
+
+impl UserSeason {
+    pub const SEED: &'static str = "UserSeason";
+
+    pub const ACCOUNT_SIZE: usize = 8 + 32 + 1 + 8;
+
+    pub fn update_user_in_season(&mut self, user: Pubkey, season: u8, sol_amount: u64) {
+        self.user = user;
+        self.season = season;
+        self.total_sol_bet += sol_amount;
     }
 }
 

@@ -14,6 +14,7 @@ pub fn create_match(
     let match_account = &mut ctx.accounts.match_account;
     let user = &mut ctx.accounts.user;
     let global = &mut ctx.accounts.global;
+    let user_season = &mut ctx.accounts.user_season;
 
     let host_squad_account = &ctx.accounts.host_squad;
     let mut host_squad_account_data: &[u8] = &host_squad_account.data.borrow();
@@ -60,6 +61,9 @@ pub fn create_match(
 
     global.increment();
 
+    // initial state
+    user_season.update_user_in_season(*user.key, global.current_season, 0);
+
     Ok(())
 }
 
@@ -85,6 +89,15 @@ pub struct CreateMatch<'info> {
         bump,
     )]
     pub global: Account<'info, Global>,
+
+    #[account(
+        init_if_needed,
+        payer = user,
+        space = UserSeason::ACCOUNT_SIZE,
+        seeds = [UserSeason::SEED.as_bytes(), user.key().as_ref(), global.current_season.to_le_bytes().as_ref()],
+        bump
+    )]
+    pub user_season: Account<'info, UserSeason>,
 
     #[account(mut)]
     pub user: Signer<'info>,

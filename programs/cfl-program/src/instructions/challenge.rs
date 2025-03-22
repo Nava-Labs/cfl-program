@@ -5,10 +5,13 @@ use anchor_lang::{prelude::*, system_program};
 
 pub fn challenge(ctx: Context<Challenge>, _match_id: u64) -> Result<()> {
     let user = &mut ctx.accounts.user;
+    let global = &mut ctx.accounts.global;
     let challenger_owner_profile = &mut ctx.accounts.challenger_owner_profile;
     let host_owner_profile = &mut ctx.accounts.host_owner_profile;
     let match_account = &mut ctx.accounts.match_account;
     let challenger_squad_account = &mut ctx.accounts.challenger_squad;
+    let host_owner_season = &mut ctx.accounts.host_owner_season;
+    let challenger_owner_season = &mut ctx.accounts.challenger_owner_season;
 
     let mut challenger_squad_account_data: &[u8] = &challenger_squad_account.data.borrow();
     let challenger_squad_data: Squad =
@@ -36,6 +39,18 @@ pub fn challenge(ctx: Context<Challenge>, _match_id: u64) -> Result<()> {
 
     challenger_owner_profile.add_total_sol_bet(match_account.sol_bet_amount);
     host_owner_profile.add_total_sol_bet(match_account.sol_bet_amount);
+
+    challenger_owner_season.update_user_in_season(
+        user.key(),
+        global.current_season,
+        match_account.sol_bet_amount,
+    );
+
+    host_owner_season.update_user_in_season(
+        match_account.host_squad_owner,
+        global.current_season,
+        match_account.sol_bet_amount,
+    );
 
     let transfer_ctx = CpiContext::new(
         ctx.accounts.system_program.to_account_info(),
@@ -77,6 +92,31 @@ pub struct Challenge<'info> {
         bump
     )]
     pub host_owner_profile: Account<'info, UserProfile>,
+
+    #[account(
+        mut,
+        seeds = [Global::SEED.as_bytes()],
+        bump,
+    )]
+    pub global: Account<'info, Global>,
+
+    #[account(
+        init_if_needed,
+        payer = user,
+        space = UserSeason::ACCOUNT_SIZE,
+        seeds = [UserSeason::SEED.as_bytes(), match_account.host_squad_owner.key().as_ref(), global.current_season.to_le_bytes().as_ref()],
+        bump
+    )]
+    pub host_owner_season: Account<'info, UserSeason>,
+
+    #[account(
+        init_if_needed,
+        payer = user,
+        space = UserSeason::ACCOUNT_SIZE,
+        seeds = [UserSeason::SEED.as_bytes(), user.key().as_ref(), global.current_season.to_le_bytes().as_ref()],
+        bump
+    )]
+    pub challenger_owner_season: Account<'info, UserSeason>,
 
     #[account(mut)]
     pub user: Signer<'info>,
