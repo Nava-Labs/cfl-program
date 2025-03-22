@@ -5,6 +5,7 @@ pub mod finalize;
 pub mod host_claim_sol;
 pub mod initialize;
 pub mod update_fee_settings;
+pub mod update_nft_metadata;
 pub mod winner_claim_sol;
 
 pub use challenge::*;
@@ -14,4 +15,5 @@ pub use finalize::*;
 pub use host_claim_sol::*;
 pub use initialize::*;
 pub use update_fee_settings::*;
+pub use update_nft_metadata::*;
 pub use winner_claim_sol::*;

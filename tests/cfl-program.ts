@@ -16,8 +16,19 @@ import {
 import { CflProgram } from "../target/types/cfl_program";
 import { PythSolanaReceiver } from "@pythnetwork/pyth-solana-receiver";
 import { BN } from "bn.js";
-import { MPL_CORE_PROGRAM_ID } from "@metaplex-foundation/mpl-core";
-import { keypairIdentity } from "@metaplex-foundation/umi";
+import {
+  collectionAddress,
+  fetchAllAssets,
+  fetchAssetsByCollection,
+  fetchAssetsByOwner,
+  fetchCollection,
+  fetchCollectionsByUpdateAuthority,
+  getAssetV1GpaBuilder,
+  Key,
+  mplCore,
+  MPL_CORE_PROGRAM_ID,
+} from "@metaplex-foundation/mpl-core";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 
 const secretKeyDeployer = Uint8Array.from(
   require("../environment/deployer.json"),
@@ -31,6 +42,7 @@ const GLOBAL_SEED = "Global";
 const SQUAD_SEED = "Squad";
 const PROFILE_SEED = "Profile";
 const MATCH_SEED = "Match";
+const USER_SEASON_SEED = "UserSeason";
 
 describe("cfl-program", () => {
   const provider = anchor.AnchorProvider.env();
@@ -41,10 +53,7 @@ describe("cfl-program", () => {
 
   const keypairFeeRecipient = Keypair.generate();
 
-  const pythSolanaReceiver = new PythSolanaReceiver({
-    connection,
-    wallet,
-  });
+  let keypairAsset = Keypair.generate();
 
   // Configure the client to use the local cluster.
   anchor.setProvider(provider);
@@ -97,33 +106,15 @@ describe("cfl-program", () => {
   });
 
   it("Squad Created! by Deployer", async () => {
-    let keypairAsset = Keypair.generate();
-
-    const pf1 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf2 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf3 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf4 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf5 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf6 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf7 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf8 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf9 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf10 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-
-    const pfs = [pf1, pf2, pf3, pf4, pf5, pf6, pf7, pf8, pf9, pf10];
-    const percentages = [
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-    ];
-
+    let pfExample = new PublicKey(
+      "7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq",
+    );
+    let pfs = [];
+    let allocations = [];
+    for (let i = 0; i < 10; i++) {
+      pfs.push(pfExample);
+      allocations.push(parseFloat("10"));
+    }
     const formation = new BN(433);
 
     let [profile] = PublicKey.findProgramAddressSync(
@@ -141,7 +132,7 @@ describe("cfl-program", () => {
     );
 
     const ix = await program.methods
-      .createSquad(1, pfs, percentages, formation)
+      .createSquad(1, pfs, allocations, formation)
       .accounts({
         asset: keypairAsset.publicKey,
         // @ts-ignore
@@ -165,89 +156,41 @@ describe("cfl-program", () => {
     );
 
     const profileState = await program.account.userProfile.fetch(profile);
-    console.log("Profile State", JSON.stringify(profileState, null, 3));
+    console.log(
+      "Deployer Profile State",
+      JSON.stringify(profileState, null, 3),
+    );
 
     const squadState = await program.account.squad.fetch(squad);
-    console.log("Squad State", JSON.stringify(squadState, null, 3));
+    console.log("Deployer Squad State", JSON.stringify(squadState, null, 3));
+
+    await fetchMplxNft(keypairDeployer.publicKey);
   });
 
-  it("Squad Created! by User", async () => {
-    let keypairAsset = Keypair.generate();
+  const fetchMplxNft = async (owner: PublicKey) => {
+    const umi = createUmi(connection);
 
-    const pf1 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf2 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf3 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf4 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf5 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf6 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf7 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf8 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf9 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
-    const pf10 = new PublicKey("7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq");
+    const assetsByOwner = await fetchAssetsByOwner(umi, owner.toString());
+    console.log(assetsByOwner);
+  };
 
-    const pfs = [pf1, pf2, pf3, pf4, pf5, pf6, pf7, pf8, pf9, pf10];
-    const percentages = [
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-      parseFloat("10"),
-    ];
+  const fetchNftCollection = async (collectionPubkey: PublicKey) => {
+    const umi = createUmi(connection);
 
-    const formation = new BN(433);
+    const collection = await fetchCollection(umi, collectionPubkey.toString());
+    console.log("Collection", collection);
 
-    let [profile] = PublicKey.findProgramAddressSync(
-      [Buffer.from(PROFILE_SEED), keypairUser.publicKey.toBuffer()],
-      program.programId,
+    const collectionDetails = await fetchAssetsByCollection(
+      umi,
+      collectionPubkey.toString(),
     );
+    console.log("Collection Details", collectionDetails);
+  };
+
+  it("Update nft metadata!", async () => {
+    const keypairCollection = Keypair.generate();
 
     let [squad] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from(SQUAD_SEED),
-        keypairUser.publicKey.toBuffer(),
-        Buffer.from(new Uint8Array([1])),
-      ],
-      program.programId,
-    );
-
-    const ix = await program.methods
-      .createSquad(1, pfs, percentages, formation)
-      .accounts({
-        asset: keypairAsset.publicKey,
-        // @ts-ignore
-        squad,
-        userProfile: profile,
-        user: keypairUser.publicKey,
-        mplCoreProgram: MPL_CORE_PROGRAM_ID,
-      })
-      .instruction();
-
-    const tx = new Transaction().add(ix);
-    tx.feePayer = keypairUser.publicKey;
-
-    await sendAndConfirmTransaction(
-      connection,
-      tx,
-      [keypairAsset, keypairUser],
-      {
-        skipPreflight: false,
-      },
-    );
-
-    const profileState = await program.account.userProfile.fetch(profile);
-    console.log("Profile State", JSON.stringify(profileState, null, 3));
-
-    const squadState = await program.account.squad.fetch(squad);
-    console.log("Squad State", JSON.stringify(squadState, null, 3));
-  });
-
-  it("Match Created!", async () => {
-    let [hostSquad] = PublicKey.findProgramAddressSync(
       [
         Buffer.from(SQUAD_SEED),
         keypairDeployer.publicKey.toBuffer(),
@@ -256,203 +199,647 @@ describe("cfl-program", () => {
       program.programId,
     );
 
-    const id = new BN(1);
-
-    let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
-      program.programId,
-    );
-
-    const [global] = PublicKey.findProgramAddressSync(
-      [Buffer.from(GLOBAL_SEED)],
-      program.programId,
-    );
-
-    const start = new BN(1773085020);
-    const duration = new BN(123);
-    const sol = new BN(10 * LAMPORTS_PER_SOL);
-    const matchType = 1;
-
     const ix = await program.methods
-      .createMatch(id, start, duration, sol, matchType)
+      .updateNftMetadata(1, "aa", "bb")
       .accounts({
+        asset: keypairAsset.publicKey,
+        collection: keypairCollection.publicKey,
         // @ts-ignore
-        hostSquad,
-        // @ts-ignore
-        matchAccount: match,
-        global,
+        squad,
         user: keypairDeployer.publicKey,
+        mplCoreProgram: MPL_CORE_PROGRAM_ID,
       })
       .instruction();
 
     const tx = new Transaction().add(ix);
     tx.feePayer = keypairDeployer.publicKey;
 
-    await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
-      skipPreflight: false,
-    });
-
-    let state = await program.account.global.fetch(global);
-    console.log(state);
-
-    let [hostOwnerProfile] = PublicKey.findProgramAddressSync(
-      [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
-      program.programId,
+    await sendAndConfirmTransaction(
+      connection,
+      tx,
+      [keypairAsset, keypairCollection, keypairDeployer],
+      {
+        skipPreflight: false,
+      },
     );
 
-    let profileState =
-      await program.account.userProfile.fetch(hostOwnerProfile);
-    console.log(profileState);
+    await fetchMplxNft(keypairDeployer.publicKey);
+    await fetchNftCollection(keypairCollection.publicKey);
   });
 
-  it("Challenge", async () => {
-    let [challengerSquad] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from(SQUAD_SEED),
-        keypairUser.publicKey.toBuffer(),
-        Buffer.from(new Uint8Array([1])),
-      ],
-      program.programId,
-    );
+  // it("Squad Created! by User", async () => {
+  //   let keypairAsset = Keypair.generate();
 
-    const id = new BN(1);
+  //   let pfExample = new PublicKey(
+  //     "7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq",
+  //   );
+  //   let pfs = [];
+  //   let allocations = [];
+  //   for (let i = 0; i < 10; i++) {
+  //     pfs.push(pfExample);
+  //     allocations.push(parseFloat("10"));
+  //   }
+  //   const formation = new BN(433);
 
-    let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
-      program.programId,
-    );
+  //   let [profile] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(PROFILE_SEED), keypairUser.publicKey.toBuffer()],
+  //     program.programId,
+  //   );
 
-    let [hostOwnerProfile] = PublicKey.findProgramAddressSync(
-      [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
-      program.programId,
-    );
+  //   let [squad] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(SQUAD_SEED),
+  //       keypairUser.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([1])),
+  //     ],
+  //     program.programId,
+  //   );
 
-    let [challengerOwnerProfile] = PublicKey.findProgramAddressSync(
-      [Buffer.from(PROFILE_SEED), keypairUser.publicKey.toBuffer()],
-      program.programId,
-    );
+  //   const ix = await program.methods
+  //     .createSquad(1, pfs, allocations, formation)
+  //     .accounts({
+  //       asset: keypairAsset.publicKey,
+  //       // @ts-ignore
+  //       squad,
+  //       userProfile: profile,
+  //       user: keypairUser.publicKey,
+  //       mplCoreProgram: MPL_CORE_PROGRAM_ID,
+  //     })
+  //     .instruction();
 
-    const ix = await program.methods
-      .challenge(id)
-      .accounts({
-        // @ts-ignore
-        challengerSquad,
-        // @ts-ignore
-        match,
-        challengerOwnerProfile,
-        hostOwnerProfile,
-        user: keypairUser.publicKey,
-      })
-      .instruction();
+  //   const tx = new Transaction().add(ix);
+  //   tx.feePayer = keypairUser.publicKey;
 
-    const tx = new Transaction().add(ix);
-    tx.feePayer = keypairUser.publicKey;
+  //   await sendAndConfirmTransaction(
+  //     connection,
+  //     tx,
+  //     [keypairAsset, keypairUser],
+  //     {
+  //       skipPreflight: false,
+  //     },
+  //   );
 
-    await sendAndConfirmTransaction(connection, tx, [keypairUser], {
-      skipPreflight: false,
-    });
+  //   const profileState = await program.account.userProfile.fetch(profile);
+  //   console.log("User Profile State", JSON.stringify(profileState, null, 3));
 
-    console.log(
-      "Keypair Fee Recipient Balance => ",
-      await connection.getBalance(keypairFeeRecipient.publicKey),
-    );
+  //   const squadState = await program.account.squad.fetch(squad);
+  //   console.log("User Squad State", JSON.stringify(squadState, null, 3));
 
-    console.log(
-      "Keypair User Balance => ",
-      await connection.getBalance(keypairUser.publicKey),
-    );
+  //   await fetchMplxNft(keypairUser.publicKey);
+  // });
 
-    let hostOwnerProfileState =
-      await program.account.userProfile.fetch(hostOwnerProfile);
-    console.log(hostOwnerProfileState);
+  // it("Match Created! Season 0", async () => {
+  //   let [hostSquad] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(SQUAD_SEED),
+  //       keypairDeployer.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([1])),
+  //     ],
+  //     program.programId,
+  //   );
 
-    let challengerOwnerProfileState = await program.account.userProfile.fetch(
-      challengerOwnerProfile,
-    );
-    console.log(challengerOwnerProfileState);
-  });
+  //   const id = new BN(1);
 
-  it("Finalize", async () => {
-    const id = new BN(1);
+  //   let [match] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
+  //     program.programId,
+  //   );
 
-    let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
-      program.programId,
-    );
+  //   const [global] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(GLOBAL_SEED)],
+  //     program.programId,
+  //   );
 
-    let [winner] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from(SQUAD_SEED),
-        keypairUser.publicKey.toBuffer(),
-        Buffer.from(new Uint8Array([1])),
-      ],
-      program.programId,
-    );
+  //   const [userSeason] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(USER_SEASON_SEED),
+  //       keypairDeployer.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([0])),
+  //     ],
+  //     program.programId,
+  //   );
 
-    const ix = await program.methods
-      .finalize(id, winner, 1, 2)
-      .accounts({
-        // @ts-ignore
-        match,
-        user: keypairDeployer.publicKey,
-      })
-      .instruction();
+  //   const start = new BN(1773085020);
+  //   const duration = new BN(123);
+  //   const sol = new BN(10 * LAMPORTS_PER_SOL);
+  //   const matchType = 1;
 
-    const tx = new Transaction().add(ix);
-    tx.feePayer = keypairDeployer.publicKey;
-    await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
-      skipPreflight: false,
-    });
-  });
+  //   const ix = await program.methods
+  //     .createMatch(id, start, duration, sol, matchType)
+  //     .accounts({
+  //       // @ts-ignore
+  //       hostSquad,
+  //       // @ts-ignore
+  //       matchAccount: match,
+  //       global,
+  //       userSeason,
+  //       user: keypairDeployer.publicKey,
+  //     })
+  //     .instruction();
 
-  it("Claim Sol by winner", async () => {
-    const [global] = PublicKey.findProgramAddressSync(
-      [Buffer.from(GLOBAL_SEED)],
-      program.programId,
-    );
+  //   const tx = new Transaction().add(ix);
+  //   tx.feePayer = keypairDeployer.publicKey;
 
-    const id = new BN(1);
+  //   await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
+  //     skipPreflight: false,
+  //   });
 
-    let [match] = PublicKey.findProgramAddressSync(
-      [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
-      program.programId,
-    );
+  //   let state = await program.account.global.fetch(global);
+  //   console.log("Global State", JSON.stringify(state, null, 3));
 
-    let [winner] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from(SQUAD_SEED),
-        keypairUser.publicKey.toBuffer(),
-        Buffer.from(new Uint8Array([1])),
-      ],
-      program.programId,
-    );
+  //   let [hostOwnerProfile] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
+  //     program.programId,
+  //   );
 
-    const ix = await program.methods
-      .winnerClaimSol(id)
-      .accounts({
-        // @ts-ignore
-        match_account: match,
-        squadWinner: winner,
-        feeRecipient: keypairFeeRecipient.publicKey,
-        global,
-        user: keypairUser.publicKey,
-      })
-      .instruction();
+  //   let profileState =
+  //     await program.account.userProfile.fetch(hostOwnerProfile);
+  //   console.log(
+  //     "Deployer profile state",
+  //     JSON.stringify(profileState, null, 3),
+  //   );
+  // });
 
-    const tx = new Transaction().add(ix);
-    tx.feePayer = keypairUser.publicKey;
-    await sendAndConfirmTransaction(connection, tx, [keypairUser], {
-      skipPreflight: false,
-    });
+  // it("Challenge", async () => {
+  //   let [challengerSquad] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(SQUAD_SEED),
+  //       keypairUser.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([1])),
+  //     ],
+  //     program.programId,
+  //   );
 
-    console.log(
-      "Keypair Fee Recipient Balance => ",
-      await connection.getBalance(keypairFeeRecipient.publicKey),
-    );
+  //   const id = new BN(1);
 
-    console.log(
-      "Keypair User Balance => ",
-      await connection.getBalance(keypairUser.publicKey),
-    );
-  });
+  //   let [match] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
+  //     program.programId,
+  //   );
+
+  //   const [global] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(GLOBAL_SEED)],
+  //     program.programId,
+  //   );
+
+  //   let [hostOwnerProfile] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
+  //     program.programId,
+  //   );
+
+  //   let [challengerOwnerProfile] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(PROFILE_SEED), keypairUser.publicKey.toBuffer()],
+  //     program.programId,
+  //   );
+
+  //   const [hostOwnerSeason] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(USER_SEASON_SEED),
+  //       keypairDeployer.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([0])),
+  //     ],
+  //     program.programId,
+  //   );
+
+  //   const [challengerOwnerSeason] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(USER_SEASON_SEED),
+  //       keypairUser.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([0])),
+  //     ],
+  //     program.programId,
+  //   );
+
+  //   const ix = await program.methods
+  //     .challenge(id)
+  //     .accounts({
+  //       // @ts-ignore
+  //       challengerSquad,
+  //       // @ts-ignore
+  //       match,
+  //       challengerOwnerProfile,
+  //       hostOwnerProfile,
+  //       global,
+  //       hostOwnerSeason,
+  //       challengerOwnerSeason,
+  //       user: keypairUser.publicKey,
+  //     })
+  //     .instruction();
+
+  //   const tx = new Transaction().add(ix);
+  //   tx.feePayer = keypairUser.publicKey;
+
+  //   await sendAndConfirmTransaction(connection, tx, [keypairUser], {
+  //     skipPreflight: false,
+  //   });
+
+  //   console.log(
+  //     "Keypair Fee Recipient Balance => ",
+  //     await connection.getBalance(keypairFeeRecipient.publicKey),
+  //   );
+
+  //   console.log(
+  //     "Keypair User Balance => ",
+  //     await connection.getBalance(keypairUser.publicKey),
+  //   );
+
+  //   let hostOwnerProfileState =
+  //     await program.account.userProfile.fetch(hostOwnerProfile);
+  //   console.log(
+  //     "Host Owner (Deployer) Profile state",
+  //     JSON.stringify(hostOwnerProfileState, null, 3),
+  //   );
+
+  //   let challengerOwnerProfileState = await program.account.userProfile.fetch(
+  //     challengerOwnerProfile,
+  //   );
+  //   console.log(
+  //     "Challenger Owner (User) Profile state",
+  //     JSON.stringify(challengerOwnerProfileState, null, 3),
+  //   );
+
+  //   let hostOwnerSeasonState =
+  //     await program.account.userSeason.fetch(hostOwnerSeason);
+  //   console.log(
+  //     "Host Owner Season (Deployer) state",
+  //     JSON.stringify(hostOwnerSeasonState, null, 3),
+  //   );
+
+  //   let challengerOwnerSeasonState = await program.account.userSeason.fetch(
+  //     challengerOwnerSeason,
+  //   );
+  //   console.log(
+  //     "Challenger Owner Season (User) state",
+  //     JSON.stringify(challengerOwnerSeasonState, null, 3),
+  //   );
+  // });
+
+  // it("Finalize", async () => {
+  //   const id = new BN(1);
+
+  //   let [match] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
+  //     program.programId,
+  //   );
+
+  //   let [winner] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(SQUAD_SEED),
+  //       keypairUser.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([1])),
+  //     ],
+  //     program.programId,
+  //   );
+
+  //   const ix = await program.methods
+  //     .finalize(id, winner, 1, 2)
+  //     .accounts({
+  //       // @ts-ignore
+  //       match,
+  //       user: keypairDeployer.publicKey,
+  //     })
+  //     .instruction();
+
+  //   const tx = new Transaction().add(ix);
+  //   tx.feePayer = keypairDeployer.publicKey;
+  //   await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
+  //     skipPreflight: false,
+  //   });
+  // });
+
+  // it("Claim Sol by winner", async () => {
+  //   const [global] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(GLOBAL_SEED)],
+  //     program.programId,
+  //   );
+
+  //   const id = new BN(1);
+
+  //   let [match] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
+  //     program.programId,
+  //   );
+
+  //   let [winner] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(SQUAD_SEED),
+  //       keypairUser.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([1])),
+  //     ],
+  //     program.programId,
+  //   );
+
+  //   const ix = await program.methods
+  //     .winnerClaimSol(id)
+  //     .accounts({
+  //       // @ts-ignore
+  //       match_account: match,
+  //       squadWinner: winner,
+  //       feeRecipient: keypairFeeRecipient.publicKey,
+  //       global,
+  //       user: keypairUser.publicKey,
+  //     })
+  //     .instruction();
+
+  //   const tx = new Transaction().add(ix);
+  //   tx.feePayer = keypairUser.publicKey;
+  //   await sendAndConfirmTransaction(connection, tx, [keypairUser], {
+  //     skipPreflight: false,
+  //   });
+
+  //   console.log(
+  //     "Keypair Fee Recipient Balance => ",
+  //     await connection.getBalance(keypairFeeRecipient.publicKey),
+  //   );
+
+  //   console.log(
+  //     "Keypair User Balance => ",
+  //     await connection.getBalance(keypairUser.publicKey),
+  //   );
+  // });
+
+  // it("global settings Updated!", async () => {
+  //   let fee = new BN(300); // 3%
+  //   let feeRecipient = keypairFeeRecipient.publicKey;
+  //   let currentSeason = 1;
+
+  //   const ix = await program.methods
+  //     .updateGlobalSettings(fee, feeRecipient, currentSeason)
+  //     .accounts({ user: keypairDeployer.publicKey })
+  //     .instruction();
+  //   const tx = new Transaction().add(ix);
+  //   tx.feePayer = keypairDeployer.publicKey;
+
+  //   await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
+  //     skipPreflight: false,
+  //   });
+
+  //   const [global] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(GLOBAL_SEED)],
+  //     program.programId,
+  //   );
+
+  //   let state = await program.account.global.fetch(global);
+  //   console.log("Updated State: ", state);
+  // });
+
+  // it("Match Created! Season 1", async () => {
+  //   let [hostSquad] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(SQUAD_SEED),
+  //       keypairDeployer.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([1])),
+  //     ],
+  //     program.programId,
+  //   );
+
+  //   const id = new BN(2);
+
+  //   let [match] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
+  //     program.programId,
+  //   );
+
+  //   const [global] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(GLOBAL_SEED)],
+  //     program.programId,
+  //   );
+
+  //   const [userSeason] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(USER_SEASON_SEED),
+  //       keypairDeployer.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([1])),
+  //     ],
+  //     program.programId,
+  //   );
+
+  //   const start = new BN(1773085020);
+  //   const duration = new BN(123);
+  //   const sol = new BN(5 * LAMPORTS_PER_SOL);
+  //   const matchType = 1;
+
+  //   const ix = await program.methods
+  //     .createMatch(id, start, duration, sol, matchType)
+  //     .accounts({
+  //       // @ts-ignore
+  //       hostSquad,
+  //       // @ts-ignore
+  //       matchAccount: match,
+  //       global,
+  //       userSeason,
+  //       user: keypairDeployer.publicKey,
+  //     })
+  //     .instruction();
+
+  //   const tx = new Transaction().add(ix);
+  //   tx.feePayer = keypairDeployer.publicKey;
+
+  //   await sendAndConfirmTransaction(connection, tx, [keypairDeployer], {
+  //     skipPreflight: false,
+  //   });
+
+  //   let state = await program.account.global.fetch(global);
+  //   console.log("Global State", JSON.stringify(state, null, 3));
+
+  //   let [hostOwnerProfile] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
+  //     program.programId,
+  //   );
+
+  //   let profileState =
+  //     await program.account.userProfile.fetch(hostOwnerProfile);
+  //   console.log(
+  //     "Deployer profile state",
+  //     JSON.stringify(profileState, null, 3),
+  //   );
+  // });
+
+  // it("Create Squad and Challenge by User", async () => {
+  //   let keypairAsset = Keypair.generate();
+
+  //   let pfExample = new PublicKey(
+  //     "7YmBpFooNruexenhJLU1wwUWUCzgETLQGVF1jLjqqaWq",
+  //   );
+  //   let pfs = [];
+  //   let allocations = [];
+  //   for (let i = 0; i < 10; i++) {
+  //     pfs.push(pfExample);
+  //     allocations.push(parseFloat("10"));
+  //   }
+  //   const formation = new BN(433);
+
+  //   let [profile] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(PROFILE_SEED), keypairUser.publicKey.toBuffer()],
+  //     program.programId,
+  //   );
+
+  //   let [challengerSquad] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(SQUAD_SEED),
+  //       keypairUser.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([2])),
+  //     ],
+  //     program.programId,
+  //   );
+
+  //   const createSquadIx = await program.methods
+  //     .createSquad(2, pfs, allocations, formation)
+  //     .accounts({
+  //       asset: keypairAsset.publicKey,
+  //       // @ts-ignore
+  //       squad: challengerSquad,
+  //       userProfile: profile,
+  //       user: keypairUser.publicKey,
+  //       mplCoreProgram: MPL_CORE_PROGRAM_ID,
+  //     })
+  //     .instruction();
+
+  //   const id = new BN(2);
+
+  //   let [match] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(MATCH_SEED), id.toBuffer("le", 8)],
+  //     program.programId,
+  //   );
+
+  //   const [global] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(GLOBAL_SEED)],
+  //     program.programId,
+  //   );
+
+  //   let [hostOwnerProfile] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(PROFILE_SEED), keypairDeployer.publicKey.toBuffer()],
+  //     program.programId,
+  //   );
+
+  //   let [challengerOwnerProfile] = PublicKey.findProgramAddressSync(
+  //     [Buffer.from(PROFILE_SEED), keypairUser.publicKey.toBuffer()],
+  //     program.programId,
+  //   );
+
+  //   const [hostOwnerSeason] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(USER_SEASON_SEED),
+  //       keypairDeployer.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([1])),
+  //     ],
+  //     program.programId,
+  //   );
+
+  //   const [challengerOwnerSeason] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(USER_SEASON_SEED),
+  //       keypairUser.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([1])),
+  //     ],
+  //     program.programId,
+  //   );
+
+  //   const challengeIx = await program.methods
+  //     .challenge(id)
+  //     .accounts({
+  //       // @ts-ignore
+  //       challengerSquad,
+  //       // @ts-ignore
+  //       match,
+  //       challengerOwnerProfile,
+  //       hostOwnerProfile,
+  //       global,
+  //       hostOwnerSeason,
+  //       challengerOwnerSeason,
+  //       user: keypairUser.publicKey,
+  //     })
+  //     .instruction();
+
+  //   const tx = new Transaction().add(createSquadIx, challengeIx);
+  //   tx.feePayer = keypairUser.publicKey;
+  //   tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+  //   tx.partialSign(keypairAsset);
+  //   tx.partialSign(keypairUser);
+
+  //   const serializedTx = tx.serialize();
+  //   console.log("tx size", serializedTx.length);
+
+  //   await sendAndConfirmTransaction(
+  //     connection,
+  //     tx,
+  //     [keypairAsset, keypairUser],
+  //     {
+  //       skipPreflight: false,
+  //     },
+  //   );
+
+  //   console.log(
+  //     "Keypair Fee Recipient Balance => ",
+  //     await connection.getBalance(keypairFeeRecipient.publicKey),
+  //   );
+
+  //   console.log(
+  //     "Keypair User Balance => ",
+  //     await connection.getBalance(keypairUser.publicKey),
+  //   );
+
+  //   let hostOwnerProfileState =
+  //     await program.account.userProfile.fetch(hostOwnerProfile);
+  //   console.log(
+  //     "Host Owner (Deployer) Profile state",
+  //     JSON.stringify(hostOwnerProfileState, null, 3),
+  //   );
+
+  //   let challengerOwnerProfileState = await program.account.userProfile.fetch(
+  //     challengerOwnerProfile,
+  //   );
+  //   console.log(
+  //     "Challenger Owner (User) Profile state",
+  //     JSON.stringify(challengerOwnerProfileState, null, 3),
+  //   );
+
+  //   let hostOwnerSeasonState =
+  //     await program.account.userSeason.fetch(hostOwnerSeason);
+  //   console.log(
+  //     "Host Owner Season (Deployer) state",
+  //     JSON.stringify(hostOwnerSeasonState, null, 3),
+  //   );
+
+  //   let challengerOwnerSeasonState = await program.account.userSeason.fetch(
+  //     challengerOwnerSeason,
+  //   );
+  //   console.log(
+  //     "Challenger Owner Season (User) state",
+  //     JSON.stringify(challengerOwnerSeasonState, null, 3),
+  //   );
+
+  //   const [hostOwnerSeason0] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(USER_SEASON_SEED),
+  //       keypairDeployer.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([0])),
+  //     ],
+  //     program.programId,
+  //   );
+
+  //   const [challengerOwnerSeason0] = PublicKey.findProgramAddressSync(
+  //     [
+  //       Buffer.from(USER_SEASON_SEED),
+  //       keypairUser.publicKey.toBuffer(),
+  //       Buffer.from(new Uint8Array([0])),
+  //     ],
+  //     program.programId,
+  //   );
+
+  //   let hostOwnerSeason0State =
+  //     await program.account.userSeason.fetch(hostOwnerSeason0);
+  //   console.log(
+  //     "Host Owner Season 0 (Deployer) state",
+  //     JSON.stringify(hostOwnerSeason0State, null, 3),
+  //   );
+
+  //   let challengerOwnerSeason0State = await program.account.userSeason.fetch(
+  //     challengerOwnerSeason0,
+  //   );
+  //   console.log(
+  //     "Challenger Owner Season 0 (User) state",
+  //     JSON.stringify(challengerOwnerSeason0State, null, 3),
+  //   );
+  // });
 });

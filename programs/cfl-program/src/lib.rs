@@ -21,12 +21,22 @@ pub mod cfl_program {
         instructions::initialize(ctx, fee_in_bps, fee_recipient)
     }
 
-    pub fn update_fee_settings(
+    pub fn update_global_settings(
         ctx: Context<UpdateFeeSettings>,
         new_fee_in_bps: u64,
         fee_recipient: Pubkey,
+        current_season: u8,
     ) -> Result<()> {
-        instructions::update_fee_settings(ctx, new_fee_in_bps, fee_recipient)
+        instructions::update_global_settings(ctx, new_fee_in_bps, fee_recipient, current_season)
+    }
+
+    pub fn update_nft_metadata(
+        ctx: Context<UpdateNftMetadata>,
+        squad_index: u8,
+        new_name: String,
+        new_uri: String,
+    ) -> Result<()> {
+        instructions::update_nft_metadata(ctx, squad_index, new_name, new_uri)
     }
 
     pub fn create_squad(
